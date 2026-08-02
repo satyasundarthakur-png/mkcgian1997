@@ -154,5 +154,40 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
   }
 }
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-variant-ligatures: common-ligatures;
+}
+
+@utility paper-grain {
+  background-image:
+    radial-gradient(
+      circle at 18% 12%,
+      color-mix(in oklab, var(--gold) 22%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 84% 8%,
+      color-mix(in oklab, var(--maroon) 16%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      color-mix(in oklab, var(--maroon) 10%, transparent),
+      transparent 55%
+    );
+}
+
+@utility gold-rule {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--gold) 90%, transparent),
+    transparent
+  );
+}
+
