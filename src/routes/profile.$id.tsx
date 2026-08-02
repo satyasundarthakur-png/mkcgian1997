@@ -211,7 +211,7 @@ function Profile() {
             {canEdit && !editing && (
               <button
                 onClick={() => setEditing(true)}
-                className="flex items-center gap-2 rounded-full bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground transition hover:bg-maroon/90 sm:mb-2"
+                className="flex items-center gap-2 rounded-full bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground transition hover:bg-maroon/90 "
               >
                 <Pencil size={14} /> Edit
               </button>
