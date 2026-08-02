@@ -45,10 +45,12 @@ export function saveMembers(members: Member[]) {
 export function updateMember(id: number, updates: Partial<Member>): Member | null {
   const members = getMembers();
   const idx = members.findIndex((m) => m.id === id);
-  if (idx === -1) return null;
-  members[idx] = { ...members[idx], ...updates, profile_claimed: true };
+  const existing = members[idx];
+  if (idx === -1 || !existing) return null;
+  const updated: Member = { ...existing, ...updates, profile_claimed: true };
+  members[idx] = updated;
   saveMembers(members);
-  return members[idx];
+  return updated;
 }
 
 export function resetToSeed() {
