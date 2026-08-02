@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Private reunion directory for the MKCG Medical College MBBS batch of 1997.",
+          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with the batch password to browse and update batchmate profiles.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
