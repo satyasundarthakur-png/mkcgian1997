@@ -11,6 +11,7 @@ import {
 } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GradientBar } from "@/components/GradientBar";
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
@@ -64,13 +65,7 @@ function Directory() {
   return (
     <div className="min-h-screen bg-cream paper-grain">
       <header className="bg-maroon text-maroon-foreground">
-        <div
-          className="h-1.5 w-full"
-          style={{
-            background:
-              "linear-gradient(90deg, oklch(0.62 0.18 20), oklch(0.7 0.16 90), oklch(0.62 0.15 160), oklch(0.58 0.16 250), oklch(0.55 0.18 320))",
-          }}
-        />
+        <GradientBar className="h-1.5 w-full" />
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
           <div className="flex min-w-0 items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/20 text-gold animate-pulse-ring">

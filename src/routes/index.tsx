@@ -4,6 +4,7 @@ import { Stethoscope, Lock, Sparkles, Users, Cake, Award } from "lucide-react";
 import { login } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GradientBar } from "@/components/GradientBar";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -115,13 +116,7 @@ function LoginPage() {
             onSubmit={handleSubmit}
             className="relative overflow-hidden rounded-[1.75rem] border border-gold/50 bg-card p-7 shadow-[0_30px_60px_-30px_oklch(0.34_0.12_18/0.45)]"
           >
-            <div
-              className="absolute inset-x-0 top-0 h-1.5"
-              style={{
-                background:
-                  "linear-gradient(90deg, oklch(0.62 0.18 20), oklch(0.7 0.16 90), oklch(0.62 0.15 160), oklch(0.58 0.16 250), oklch(0.55 0.18 320))",
-              }}
-            />
+            <GradientBar className="absolute inset-x-0 top-0 h-1.5" />
             <div className="flex items-center gap-2 text-maroon">
               <Lock size={15} />
               <span className="text-[0.68rem] font-semibold uppercase tracking-[0.28em]">
