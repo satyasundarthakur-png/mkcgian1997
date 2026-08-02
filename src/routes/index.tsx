@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Stethoscope, Lock, Sparkles, Users, Cake, Award } from "lucide-react";
 import { login } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -45,7 +46,10 @@ function LoginPage() {
 
   return (
     <main className="min-h-screen bg-cream paper-grain">
-      <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1.15fr_minmax(0,0.85fr)] lg:items-center lg:py-16">
+      <div className="mx-auto flex max-w-6xl justify-end px-5 pt-6">
+        <ThemeToggle className="text-maroon" />
+      </div>
+      <div className="mx-auto grid min-h-[calc(100vh-3.5rem)] max-w-6xl grid-cols-1 gap-10 px-5 pb-10 lg:grid-cols-[1.15fr_minmax(0,0.85fr)] lg:items-center lg:pb-16">
         {/* Editorial column */}
         <section>
           <div className="flex items-center gap-3 animate-fade-up">
@@ -146,7 +150,7 @@ function LoginPage() {
                 setError("");
               }}
               placeholder="••••••••••"
-              className="mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 tracking-widest outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/40"
+              className="input-glow mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 tracking-widest outline-none focus:ring-2 focus:ring-gold/40"
             />
             {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
 

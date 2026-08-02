@@ -10,6 +10,7 @@ import {
   type Member,
 } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
@@ -84,15 +85,18 @@ function Directory() {
               </p>
             </div>
           </div>
-          <button
-            onClick={() => {
-              logout();
-              navigate({ to: "/" });
-            }}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
-          >
-            <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => {
+                logout();
+                navigate({ to: "/" });
+              }}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
+            >
+              <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
         </div>
         <div className="mx-auto hidden max-w-5xl px-5 pb-3 text-maroon-foreground/40 sm:block">
           <EcgLine className="h-5 w-full" />
@@ -118,7 +122,7 @@ function Directory() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search name, city, speciality or posting…"
-            className="w-full rounded-2xl border border-gold/40 bg-card py-3 pl-11 pr-4 shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+            className="input-glow w-full rounded-2xl border border-gold/40 bg-card py-3 pl-11 pr-4 shadow-sm outline-none"
           />
         </div>
 

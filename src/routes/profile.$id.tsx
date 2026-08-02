@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Save, Camera, Award, Plus, X, Pencil } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   fileToDataUrl,
   getMembers,
@@ -133,17 +134,20 @@ function Profile() {
     <div className="min-h-screen bg-cream paper-grain pb-16">
       {/* Banner */}
       <div className="relative" style={{ background: c.gradient }}>
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-5 py-4 text-white">
-          <button
-            onClick={() => router.history.back()}
-            aria-label="Go back"
-            className="rounded-full bg-white/15 p-2 transition hover:bg-white/25"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em]">
-            MKCGIAN 1997 · Memorabilia
-          </p>
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-5 py-4 text-white">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.history.back()}
+              aria-label="Go back"
+              className="rounded-full bg-white/15 p-2 transition hover:bg-white/25"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <p className="text-[0.65rem] font-semibold uppercase tracking-[0.28em]">
+              MKCGIAN 1997 · Memorabilia
+            </p>
+          </div>
+          <ThemeToggle className="text-white" />
         </div>
         <div className="h-10" />
       </div>
@@ -256,7 +260,7 @@ function Profile() {
                     type={f.type ?? "text"}
                     value={(form[f.key] as string | number | undefined) ?? ""}
                     onChange={(e) => handleChange(f.key, e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
+                    className="input-glow mt-1 w-full rounded-xl border border-input bg-background px-3 py-2 outline-none"
                   />
                 </div>
               ))}
@@ -271,7 +275,7 @@ function Profile() {
                     placeholder={
                       photo.startsWith("data:") ? "Uploaded photo" : "Paste a photo URL…"
                     }
-                    className="flex-1 rounded-xl border border-input bg-background px-3 py-2 outline-none focus:border-gold focus:ring-2 focus:ring-gold/30"
+                    className="input-glow flex-1 rounded-xl border border-input bg-background px-3 py-2 outline-none"
                   />
                   <button
                     onClick={() => photoInput.current?.click()}

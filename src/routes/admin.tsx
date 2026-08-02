@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trash2, Plus, LogOut, Download, Upload } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   getMembers,
   getRole,
@@ -109,6 +110,7 @@ function Admin() {
           <Link to="/directory" className="hover:underline">
             Directory
           </Link>
+          <ThemeToggle />
           <button
             onClick={() => {
               logout();
