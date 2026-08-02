@@ -71,12 +71,14 @@
 
 :root {
   --radius: 0.625rem;
-  --maroon: oklch(0.38 0.13 18);
+  --maroon: oklch(0.34 0.12 18);
   --maroon-foreground: oklch(0.99 0.01 90);
-  --gold: oklch(0.73 0.13 88);
-  --cream: oklch(0.98 0.017 85);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --gold: oklch(0.76 0.13 85);
+  --cream: oklch(0.975 0.014 84);
+  --ink: oklch(0.22 0.02 60);
+  --background: oklch(0.985 0.008 84);
+  --foreground: oklch(0.22 0.02 60);
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
   --popover: oklch(1 0 0);
