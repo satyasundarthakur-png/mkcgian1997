@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Stethoscope, Lock, Sparkles, Users, Cake, Award } from "lucide-react";
+import { Lock, Sparkles, Users, Cake, Award } from "lucide-react";
 import { login } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -54,9 +54,11 @@ function LoginPage() {
         {/* Editorial column */}
         <section>
           <div className="flex items-center gap-3 animate-fade-up">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-maroon text-gold animate-pulse-ring">
-              <Stethoscope size={20} className="animate-float-soft" />
-            </span>
+            <img
+              src="/mkcg-college-crest.png"
+              alt="MKCG Medical College crest"
+              className="h-14 w-auto shrink-0 drop-shadow-sm animate-float-soft"
+            />
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-maroon">
               MKCG Medical College
             </p>
