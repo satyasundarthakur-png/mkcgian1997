@@ -52,7 +52,7 @@ function LoginPage() {
               <Stethoscope size={20} />
             </span>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-maroon">
-              Est. 1997 · MKCG Medical College
+              MKCG Medical College
             </p>
           </div>
 
