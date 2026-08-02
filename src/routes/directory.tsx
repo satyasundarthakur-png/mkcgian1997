@@ -9,6 +9,7 @@ import {
   MONTH_NAMES,
   type Member,
 } from "@/lib/store";
+import { EcgLine } from "@/components/EcgLine";
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
@@ -71,7 +72,7 @@ function Directory() {
         />
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/20 text-gold">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/20 text-gold animate-pulse-ring">
               <Stethoscope size={18} />
             </span>
             <div className="min-w-0">
@@ -88,24 +89,27 @@ function Directory() {
               logout();
               navigate({ to: "/" });
             }}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition hover:bg-maroon-foreground/10"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
           >
             <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
           </button>
+        </div>
+        <div className="mx-auto hidden max-w-5xl px-5 pb-3 text-maroon-foreground/40 sm:block">
+          <EcgLine className="h-5 w-full" />
         </div>
       </header>
 
       <div className="mx-auto max-w-5xl px-5 py-6">
         {todaysBirthdays.length > 0 && (
-          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
-            <Cake size={20} className="shrink-0 text-maroon" />
+          <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
+            <Cake size={20} className="shrink-0 animate-float-soft text-maroon" />
             <p className="text-sm font-medium text-maroon">
               Happy birthday today — {todaysBirthdays.map((m) => m.name).join(", ")}!
             </p>
           </div>
         )}
 
-        <div className="relative mb-6">
+        <div className="relative mb-6 animate-fade-up">
           <Search
             size={18}
             className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
@@ -119,7 +123,7 @@ function Directory() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((m) => {
+          {filtered.map((m, i) => {
             const c = memberSpectrum(m.id);
             const certs = m.certificates?.length ?? 0;
             return (
@@ -127,15 +131,16 @@ function Directory() {
                 key={m.id}
                 to="/profile/$id"
                 params={{ id: String(m.id) }}
-                className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+                className="group relative animate-fade-up overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                style={{ animationDelay: `${Math.min(i, 20) * 35}ms` }}
               >
                 <span
-                  className="absolute inset-x-0 top-0 h-1"
+                  className="absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5"
                   style={{ background: c.gradient }}
                 />
                 <div className="flex items-center gap-4 p-4 pt-5">
                   <div
-                    className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full text-lg font-semibold text-white ring-2 ring-offset-2 ring-offset-card"
+                    className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full text-lg font-semibold text-white ring-2 ring-offset-2 ring-offset-card transition-transform duration-300 group-hover:scale-105"
                     style={{ background: c.gradient, boxShadow: `0 0 0 1px ${c.ring}` }}
                   >
                     {m.photo_url ? (

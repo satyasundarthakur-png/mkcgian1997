@@ -149,12 +149,12 @@ function Profile() {
       </div>
 
       <div className="mx-auto max-w-3xl pt-6 px-5">
-        <div className="overflow-hidden rounded-3xl border border-gold/40 bg-card shadow-[0_30px_60px_-35px_oklch(0.34_0.12_18/0.5)]">
+        <div className="animate-fade-up overflow-hidden rounded-3xl border border-gold/40 bg-card shadow-[0_30px_60px_-35px_oklch(0.34_0.12_18/0.5)]">
           <div className="flex flex-col items-center gap-4 px-6 pb-6 pt-6 text-center sm:flex-row sm:items-center sm:text-left">
             <div className="relative shrink-0">
 
               <div
-                className="grid h-28 w-28 place-items-center overflow-hidden rounded-full text-4xl font-semibold text-white ring-4 ring-card"
+                className="grid h-28 w-28 place-items-center overflow-hidden rounded-full text-4xl font-semibold text-white ring-4 ring-card transition-transform duration-300 hover:scale-105"
                 style={{ background: c.gradient }}
               >
                 {(editing ? photo : member.photo_url) ? (

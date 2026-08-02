@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Stethoscope, Lock, Sparkles, Users, Cake, Award } from "lucide-react";
 import { login } from "@/lib/store";
+import { EcgLine } from "@/components/EcgLine";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -47,30 +48,34 @@ function LoginPage() {
       <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 gap-10 px-5 py-10 lg:grid-cols-[1.15fr_minmax(0,0.85fr)] lg:items-center lg:py-16">
         {/* Editorial column */}
         <section>
-          <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-maroon text-gold">
-              <Stethoscope size={20} />
+          <div className="flex items-center gap-3 animate-fade-up">
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-maroon text-gold animate-pulse-ring">
+              <Stethoscope size={20} className="animate-float-soft" />
             </span>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.32em] text-maroon">
               MKCG Medical College
             </p>
           </div>
 
-          <h1 className="font-display mt-6 text-5xl leading-[0.95] text-maroon sm:text-6xl lg:text-7xl">
+          <h1 className="font-display mt-6 animate-fade-up text-5xl leading-[0.95] text-maroon sm:text-6xl lg:text-7xl [animation-delay:100ms]">
             The Class of
             <span className="block italic text-ink">Ninety&#8209;Seven</span>
           </h1>
 
           <div className="gold-rule mt-6 h-px w-40" />
 
-          <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground">
+          <div className="mt-3 h-8 w-full max-w-xs text-maroon/70 animate-fade-up [animation-delay:150ms]">
+            <EcgLine className="h-full w-full" />
+          </div>
+
+          <p className="mt-4 max-w-lg animate-fade-up text-base leading-relaxed text-muted-foreground [animation-delay:200ms]">
             A living memorabilia archive for 107 physicians who began together in Berhampur
             — portraits, birthdays, postings, families and the certificates that mark a
             life in medicine. Every batchmate carries their own colour in the spectrum.
           </p>
 
           {/* spectrum ribbon */}
-          <div className="mt-8 flex h-3 overflow-hidden rounded-full shadow-sm">
+          <div className="mt-8 flex h-3 animate-fade-up overflow-hidden rounded-full shadow-sm [animation-delay:250ms]">
             {SPECTRUM.map((h) => (
               <span
                 key={h}
@@ -80,7 +85,7 @@ function LoginPage() {
             ))}
           </div>
 
-          <dl className="mt-10 grid grid-cols-3 gap-3 sm:max-w-md">
+          <dl className="mt-10 grid animate-fade-up grid-cols-3 gap-3 sm:max-w-md [animation-delay:300ms]">
             {[
               { icon: Users, k: "107", v: "Batchmates" },
               { icon: Cake, k: "365", v: "Birthdays" },
@@ -88,7 +93,7 @@ function LoginPage() {
             ].map(({ icon: Icon, k, v }) => (
               <div
                 key={v}
-                className="rounded-2xl border border-gold/40 bg-card/70 px-3 py-4 text-center backdrop-blur"
+                className="rounded-2xl border border-gold/40 bg-card/70 px-3 py-4 text-center backdrop-blur transition duration-300 hover:-translate-y-1 hover:border-gold hover:shadow-md"
               >
                 <Icon size={16} className="mx-auto text-gold" />
                 <dt className="font-display mt-2 text-2xl text-maroon">{k}</dt>
@@ -101,7 +106,7 @@ function LoginPage() {
         </section>
 
         {/* Login card */}
-        <section className="lg:justify-self-end lg:w-full lg:max-w-sm">
+        <section className="animate-fade-up lg:justify-self-end lg:w-full lg:max-w-sm [animation-delay:150ms]">
           <form
             onSubmit={handleSubmit}
             className="relative overflow-hidden rounded-[1.75rem] border border-gold/50 bg-card p-7 shadow-[0_30px_60px_-30px_oklch(0.34_0.12_18/0.45)]"
@@ -147,9 +152,9 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition hover:bg-maroon/90"
+              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg active:translate-y-0"
             >
-              <Sparkles size={16} className="text-gold" />
+              <Sparkles size={16} className="text-gold transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
               Open the directory
             </button>
 
