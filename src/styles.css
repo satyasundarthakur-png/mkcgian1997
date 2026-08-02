@@ -67,6 +67,10 @@
 
 :root {
   --radius: 0.625rem;
+  --maroon: oklch(0.38 0.13 18);
+  --maroon-foreground: oklch(0.99 0.01 90);
+  --gold: oklch(0.73 0.13 88);
+  --cream: oklch(0.98 0.017 85);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
