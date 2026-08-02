@@ -145,13 +145,14 @@ function Profile() {
             MKCGIAN 1997 · Memorabilia
           </p>
         </div>
-        <div className="h-16" />
+        <div className="h-10" />
       </div>
 
-      <div className="mx-auto -mt-14 max-w-3xl px-5">
+      <div className="mx-auto -mt-8 max-w-3xl px-5">
         <div className="overflow-hidden rounded-3xl border border-gold/40 bg-card shadow-[0_30px_60px_-35px_oklch(0.34_0.12_18/0.5)]">
-          <div className="flex flex-col items-center gap-4 px-6 pb-6 pt-0 text-center sm:flex-row sm:items-end sm:text-left">
-            <div className="relative -mt-14">
+          <div className="flex flex-col items-center gap-4 px-6 pb-6 pt-6 text-center sm:flex-row sm:items-center sm:text-left">
+            <div className="relative shrink-0">
+
               <div
                 className="grid h-28 w-28 place-items-center overflow-hidden rounded-full text-4xl font-semibold text-white ring-4 ring-card"
                 style={{ background: c.gradient }}
