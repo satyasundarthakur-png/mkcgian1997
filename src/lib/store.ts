@@ -1,5 +1,7 @@
 import seedMembers from "@/data/members.json";
 
+export type Certificate = { id: string; url: string; title: string };
+
 export type Member = {
   id: number;
   name: string;
@@ -14,6 +16,7 @@ export type Member = {
   awards: string;
   social_media: string;
   photo_url: string;
+  certificates?: Certificate[];
   profile_claimed: boolean;
 };
 
@@ -23,6 +26,43 @@ const STORAGE_KEY = "mkcgian1997_members_v1";
 const AUTH_KEY = "mkcgian1997_auth_v1";
 
 const seed = seedMembers as unknown as Member[];
+
+/** Deterministic spectrum colour per student — golden-angle hue spread. */
+export function memberSpectrum(id: number) {
+  const hue = (id * 137.508) % 360;
+  return {
+    hue,
+    solid: `oklch(0.55 0.17 ${hue})`,
+    soft: `oklch(0.94 0.05 ${hue})`,
+    ring: `oklch(0.72 0.14 ${hue})`,
+    gradient: `linear-gradient(135deg, oklch(0.62 0.18 ${hue}), oklch(0.46 0.16 ${(hue + 38) % 360}))`,
+  };
+}
+
+/** Read an image file and downscale it to a compact data URL for local storage. */
+export function fileToDataUrl(file: File, maxSize = 900): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("read failed"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("decode failed"));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(String(reader.result));
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 
 export function getMembers(): Member[] {
   if (typeof window === "undefined") return seed;
