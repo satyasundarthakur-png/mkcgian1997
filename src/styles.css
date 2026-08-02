@@ -63,7 +63,11 @@
   --color-maroon-foreground: var(--maroon-foreground);
   --color-gold: var(--gold);
   --color-cream: var(--cream);
+  --color-ink: var(--ink);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 }
+
 
 :root {
   --radius: 0.625rem;
