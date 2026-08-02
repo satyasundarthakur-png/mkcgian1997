@@ -1,7 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut } from "lucide-react";
-import { getMembers, getRole, logout, MONTH_NAMES, type Member } from "@/lib/store";
+import { Search, Cake, LogOut, Award, Camera, Stethoscope } from "lucide-react";
+import {
+  getMembers,
+  getRole,
+  logout,
+  memberSpectrum,
+  MONTH_NAMES,
+  type Member,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
@@ -10,12 +17,12 @@ export const Route = createFileRoute("/directory")({
       {
         name: "description",
         content:
-          "Browse all 107 batchmates of the MKCG Medical College MBBS 1997 batch, search by name and see today's birthdays.",
+          "Browse all batchmates of the MKCG Medical College MBBS 1997 batch — portraits, postings, achievements and today's birthdays.",
       },
       { property: "og:title", content: "Batch Directory | MKCGIAN 1997" },
       {
         property: "og:description",
-        content: "Browse and search all 107 batchmates of the MBBS 1997 batch.",
+        content: "Browse and search the portraits and milestones of the MBBS 1997 batch.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -40,7 +47,11 @@ function Directory() {
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return members;
-    return members.filter((m) => m.name.toLowerCase().includes(q));
+    return members.filter((m) =>
+      [m.name, m.current_position, m.profession, m.address]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q)),
+    );
   }, [members, query]);
 
   const today = new Date();
@@ -49,82 +60,125 @@ function Directory() {
   );
 
   return (
-    <div className="min-h-screen bg-cream">
-      <header className="bg-maroon text-maroon-foreground px-4 py-5 shadow-md relative">
-        <h1 className="text-lg font-bold text-center">MKCGIAN 1997 — Batch Directory</h1>
-        <p className="text-center text-gold text-xs mt-1">
-          {members.length} batchmates · MBBS 1997 entry
-        </p>
-        <button
-          onClick={() => {
-            logout();
-            navigate({ to: "/" });
+    <div className="min-h-screen bg-cream paper-grain">
+      <header className="bg-maroon text-maroon-foreground">
+        <div
+          className="h-1.5 w-full"
+          style={{
+            background:
+              "linear-gradient(90deg, oklch(0.62 0.18 20), oklch(0.7 0.16 90), oklch(0.62 0.15 160), oklch(0.58 0.16 250), oklch(0.55 0.18 320))",
           }}
-          className="absolute right-4 top-5 flex items-center gap-1 text-sm"
-        >
-          <LogOut size={16} /> Logout
-        </button>
+        />
+        <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/20 text-gold">
+              <Stethoscope size={18} />
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-display truncate text-2xl leading-tight">
+                Batch Directory
+              </h1>
+              <p className="text-[0.65rem] uppercase tracking-[0.22em] text-gold">
+                {members.length} batchmates · MBBS 1997
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              logout();
+              navigate({ to: "/" });
+            }}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition hover:bg-maroon-foreground/10"
+          >
+            <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
+          </button>
+        </div>
       </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="mx-auto max-w-5xl px-5 py-6">
         {todaysBirthdays.length > 0 && (
-          <div className="bg-gold/20 border border-gold rounded-lg p-3 mb-4 flex items-center gap-2">
-            <Cake size={20} className="text-maroon" />
-            <span className="text-sm text-maroon font-medium">
-              Happy Birthday today: {todaysBirthdays.map((m) => m.name).join(", ")}!
-            </span>
+          <div className="mb-5 flex items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
+            <Cake size={20} className="shrink-0 text-maroon" />
+            <p className="text-sm font-medium text-maroon">
+              Happy birthday today — {todaysBirthdays.map((m) => m.name).join(", ")}!
+            </p>
           </div>
         )}
 
-        <div className="relative mb-4">
+        <div className="relative mb-6">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name..."
-            className="w-full border border-input bg-card rounded-lg pl-10 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-maroon"
+            placeholder="Search name, city, speciality or posting…"
+            className="w-full rounded-2xl border border-gold/40 bg-card py-3 pl-11 pr-4 shadow-sm outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/30"
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filtered.map((m) => (
-            <Link
-              key={m.id}
-              to="/profile/$id"
-              params={{ id: String(m.id) }}
-              className="bg-card rounded-xl p-4 shadow border border-border hover:shadow-md hover:border-gold transition flex items-center gap-3"
-            >
-              <div className="w-11 h-11 rounded-full bg-maroon text-maroon-foreground flex items-center justify-center font-bold overflow-hidden shrink-0">
-                {m.photo_url ? (
-                  <img
-                    src={m.photo_url}
-                    alt={m.name}
-                    loading="lazy"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  m.name.charAt(0)
-                )}
-              </div>
-              <div className="min-w-0">
-                <p className="font-semibold text-foreground truncate">{m.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {m.birth_month
-                    ? `${MONTH_NAMES[m.birth_month]} ${m.birth_day}`
-                    : "Birthday not set"}
-                </p>
-                {m.current_position && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {m.current_position}
-                  </p>
-                )}
-              </div>
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((m) => {
+            const c = memberSpectrum(m.id);
+            const certs = m.certificates?.length ?? 0;
+            return (
+              <Link
+                key={m.id}
+                to="/profile/$id"
+                params={{ id: String(m.id) }}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <span
+                  className="absolute inset-x-0 top-0 h-1"
+                  style={{ background: c.gradient }}
+                />
+                <div className="flex items-center gap-4 p-4 pt-5">
+                  <div
+                    className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full text-lg font-semibold text-white ring-2 ring-offset-2 ring-offset-card"
+                    style={{ background: c.gradient, boxShadow: `0 0 0 1px ${c.ring}` }}
+                  >
+                    {m.photo_url ? (
+                      <img
+                        src={m.photo_url}
+                        alt={`Portrait of ${m.name}`}
+                        loading="lazy"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      m.name.charAt(0)
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-foreground">{m.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {m.current_position || m.profession || "Profile awaiting details"}
+                    </p>
+                    <p className="mt-1 text-[0.7rem] uppercase tracking-[0.12em] text-muted-foreground">
+                      {m.birth_month
+                        ? `${MONTH_NAMES[m.birth_month]} ${m.birth_day}`
+                        : "Birthday not set"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 border-t border-border/70 px-4 py-2 text-[0.7rem] text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <Camera size={12} /> {m.photo_url ? "Portrait" : "No photo"}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Award size={12} /> {certs} certificate{certs === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
+
+        {filtered.length === 0 && (
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            No batchmate matches “{query}”.
+          </p>
+        )}
       </div>
     </div>
   );
