@@ -184,8 +184,11 @@ function Profile() {
                 onChange={handlePhoto}
               />
             </div>
-            <div className="min-w-0 flex-1 sm:pb-2">
-              <h1 className="font-display truncate text-3xl text-ink">{member.name}</h1>
+            <div className="min-w-0 flex-1">
+              <h1 className="font-display text-3xl leading-tight text-ink">
+                {member.name}
+              </h1>
+
               <p className="text-sm text-muted-foreground">
                 {member.current_position || member.profession || "MBBS 1997 batch"}
               </p>
