@@ -148,7 +148,7 @@ function Profile() {
         <div className="h-10" />
       </div>
 
-      <div className="mx-auto -mt-8 max-w-3xl px-5">
+      <div className="mx-auto max-w-3xl pt-6 px-5">
         <div className="overflow-hidden rounded-3xl border border-gold/40 bg-card shadow-[0_30px_60px_-35px_oklch(0.34_0.12_18/0.5)]">
           <div className="flex flex-col items-center gap-4 px-6 pb-6 pt-6 text-center sm:flex-row sm:items-center sm:text-left">
             <div className="relative shrink-0">
