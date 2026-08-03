@@ -244,6 +244,18 @@
   }
 }
 
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
 @utility animate-ecg {
   stroke-dasharray: 340;
   animation: ecg-draw 3.6s linear infinite;
@@ -259,6 +271,10 @@
 
 @utility animate-fade-up {
   animation: fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@utility animate-glow-pulse {
+  animation: glow-pulse 3.2s ease-in-out infinite;
 }
 
 @utility input-glow {

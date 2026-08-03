@@ -127,51 +127,57 @@ function Directory() {
           {filtered.map((m, i) => {
             const c = memberSpectrum(m.id);
             return (
-              <Link
-                key={m.id}
-                to="/profile/$id"
-                params={{ id: String(m.id) }}
-                className="group relative animate-fade-up overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-                style={{ animationDelay: `${Math.min(i, 20) * 35}ms` }}
-              >
+              <div key={m.id} className="group/glow relative">
                 <span
-                  className="absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5"
-                  style={{ background: c.gradient }}
+                  aria-hidden="true"
+                  className="animate-glow-pulse pointer-events-none absolute -inset-1.5 rounded-3xl blur-lg transition-opacity duration-300 group-hover/glow:opacity-90"
+                  style={{ background: c.gradient, animationDelay: `${Math.min(i, 20) * 90}ms` }}
                 />
-                <div className="flex items-center gap-4 p-4 pt-5">
-                  <div
-                    className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full text-lg font-semibold text-white ring-2 ring-offset-2 ring-offset-card transition-transform duration-300 group-hover:scale-105"
-                    style={{ background: c.gradient, boxShadow: `0 0 0 1px ${c.ring}` }}
-                  >
-                    {m.photo_url ? (
-                      <img
-                        src={m.photo_url}
-                        alt={`Portrait of ${m.name}`}
-                        loading="lazy"
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      m.name.charAt(0)
-                    )}
+                <Link
+                  to="/profile/$id"
+                  params={{ id: String(m.id) }}
+                  className="group relative z-10 block animate-fade-up overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+                  style={{ animationDelay: `${Math.min(i, 20) * 35}ms` }}
+                >
+                  <span
+                    className="absolute inset-x-0 top-0 h-1 transition-all duration-300 group-hover:h-1.5"
+                    style={{ background: c.gradient }}
+                  />
+                  <div className="flex items-center gap-4 p-4 pt-5">
+                    <div
+                      className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full text-lg font-semibold text-white ring-2 ring-offset-2 ring-offset-card transition-transform duration-300 group-hover:scale-105"
+                      style={{ background: c.gradient, boxShadow: `0 0 0 1px ${c.ring}` }}
+                    >
+                      {m.photo_url ? (
+                        <img
+                          src={m.photo_url}
+                          alt={`Portrait of ${m.name}`}
+                          loading="lazy"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        m.name.charAt(0)
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-foreground">{m.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {m.current_position || m.profession || "Profile awaiting details"}
+                      </p>
+                      <p className="mt-1 text-[0.7rem] uppercase tracking-[0.12em] text-muted-foreground">
+                        {m.birth_month
+                          ? `${MONTH_NAMES[m.birth_month]} ${m.birth_day}`
+                          : "Birthday not set"}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-foreground">{m.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {m.current_position || m.profession || "Profile awaiting details"}
-                    </p>
-                    <p className="mt-1 text-[0.7rem] uppercase tracking-[0.12em] text-muted-foreground">
-                      {m.birth_month
-                        ? `${MONTH_NAMES[m.birth_month]} ${m.birth_day}`
-                        : "Birthday not set"}
-                    </p>
+                  <div className="flex items-center gap-3 border-t border-border/70 px-4 py-2 text-[0.7rem] text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      <Camera size={12} /> {m.photo_url ? "Portrait" : "No photo"}
+                    </span>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 border-t border-border/70 px-4 py-2 text-[0.7rem] text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Camera size={12} /> {m.photo_url ? "Portrait" : "No photo"}
-                  </span>
-                </div>
-              </Link>
+                </Link>
+              </div>
             );
           })}
         </div>
