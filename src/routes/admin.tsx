@@ -2,16 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trash2, Plus, LogOut, Download, Upload } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { signOut, useAuth } from "@/lib/auth";
 import {
   getMembers,
-  getRole,
-  logout,
   resetToSeed,
   insertMember,
   deleteMemberRow,
   replaceAllMembers,
   type Member,
 } from "@/lib/store";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
