@@ -165,11 +165,18 @@ function Profile() {
           >
             <ArrowLeft size={16} /> <span className="hidden sm:inline">Back</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="hidden rounded-full bg-white/15 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.24em] text-white backdrop-blur-sm sm:inline">
               MKCGIAN 1997
             </span>
             <ThemeToggle className="text-white" />
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white/85 p-1.5 shadow-sm sm:h-10 sm:w-10">
+              <img
+                src="/mkcg-college-crest.png"
+                alt="MKCG Medical College crest"
+                className="h-full w-full object-contain"
+              />
+            </span>
           </div>
         </div>
       </div>
