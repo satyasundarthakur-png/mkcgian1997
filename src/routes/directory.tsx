@@ -67,7 +67,7 @@ function Directory() {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, user, authLoading]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
