@@ -79,7 +79,7 @@ function Profile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const router = useRouter();
-  const [role, setRole] = useState<Role | null>(null);
+  const { user, isAdmin, myMemberId, loading: authLoading, refresh } = useAuth();
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -90,16 +90,17 @@ function Profile() {
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const r = getRole();
-    if (!r) {
+    if (authLoading) return;
+    if (!user) {
       navigate({ to: "/" });
       return;
     }
-    setRole(r);
     let cancelled = false;
+
     getMembers()
       .then((members) => {
         if (cancelled) return;
