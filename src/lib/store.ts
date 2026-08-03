@@ -9,29 +9,8 @@ export class StorageUnavailableError extends Error {}
 const STORAGE_BLOCKED_MESSAGE =
   "Your browser is blocking storage for this site — this happens most often in private/incognito mode or an app's built-in browser (e.g. opening the link inside WhatsApp or Instagram). Please open this link in your regular browser (Chrome, Safari, etc.) and try again.";
 
-function safeGet(store: Storage, key: string): string | null {
-  try {
-    return store.getItem(key);
-  } catch {
-    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
-  }
-}
+export const STORAGE_HELP_MESSAGE = STORAGE_BLOCKED_MESSAGE;
 
-function safeSet(store: Storage, key: string, value: string) {
-  try {
-    store.setItem(key, value);
-  } catch {
-    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
-  }
-}
-
-function safeRemove(store: Storage, key: string) {
-  try {
-    store.removeItem(key);
-  } catch {
-    // best-effort; nothing meaningful to surface on logout
-  }
-}
 
 export type Member = {
   id: number;
