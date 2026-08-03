@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut, Camera, Stethoscope } from "lucide-react";
+import { Search, Cake, LogOut, Camera } from "lucide-react";
 import {
   getMembers,
   getRole,
@@ -68,15 +68,17 @@ function Directory() {
         <GradientBar className="h-1.5 w-full" />
         <div className="mx-auto grid max-w-5xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-5">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gold/20 text-gold animate-pulse-ring">
-              <Stethoscope size={18} />
-            </span>
+            <img
+              src="/mkcg-college-crest.png"
+              alt="MKCG Medical College crest"
+              className="h-10 w-auto shrink-0 drop-shadow-sm animate-float-soft"
+            />
             <div className="min-w-0">
               <h1 className="font-display truncate text-2xl leading-tight">
                 Batch Directory
               </h1>
               <p className="text-[0.65rem] uppercase tracking-[0.22em] text-gold">
-                {members.length} batchmates · MBBS 1997
+                All batchmates · MBBS 1997
               </p>
             </div>
           </div>
