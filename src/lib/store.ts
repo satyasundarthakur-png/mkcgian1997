@@ -47,6 +47,7 @@ export type Member = {
   social_media: string;
   photo_url: string;
   profile_claimed: boolean;
+  user_id?: string | null;
 };
 
 export type Role = "member" | "admin";
@@ -56,7 +57,8 @@ const AUTH_KEY = "mkcgian1997_auth_v1";
 /** Only the columns the app actually uses (the table also has legacy
  * awards/certificates columns that the UI no longer surfaces). */
 const MEMBER_COLUMNS =
-  "id,name,birth_month,birth_day,address,spouse,habits,profession,current_position,family,social_media,photo_url,profile_claimed";
+  "id,name,birth_month,birth_day,address,spouse,habits,profession,current_position,family,social_media,photo_url,profile_claimed,user_id";
+
 
 const seed = seedMembers as unknown as Member[];
 
