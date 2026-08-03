@@ -31,7 +31,7 @@ export type Member = {
 
 export type Role = "member" | "admin";
 
-const AUTH_KEY = "mkcgian1997_auth_v1";
+
 
 /** Only the columns the app actually uses (the table also has legacy
  * awards/certificates columns that the UI no longer surfaces). */
