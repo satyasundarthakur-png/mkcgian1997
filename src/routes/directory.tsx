@@ -40,13 +40,16 @@ function Directory() {
   const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const { user, isAdmin, myMemberId, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!getRole()) {
+    if (authLoading) return;
+    if (!user) {
       navigate({ to: "/" });
       return;
     }
     let cancelled = false;
+
     getMembers()
       .then((data) => {
         if (!cancelled) setMembers(data);
