@@ -40,13 +40,16 @@ function Admin() {
   const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { isAdmin, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (getRole() !== "admin") {
+    if (authLoading) return;
+    if (!isAdmin) {
       navigate({ to: "/" });
       return;
     }
     let cancelled = false;
+
     getMembers()
       .then((data) => {
         if (!cancelled) setMembers(data);
