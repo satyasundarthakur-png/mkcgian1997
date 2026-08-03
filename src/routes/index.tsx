@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "A memorabilia archive of the MKCG Medical College MBBS batch of 1997 — portraits, milestones and certificates of 107 doctors.",
+          "A memorabilia archive of the MKCG Medical College MBBS batch of 1997 — portraits, milestones and certificates of all doctors.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -76,7 +76,7 @@ function LoginPage() {
           </div>
 
           <p className="mt-4 max-w-lg animate-fade-up text-base leading-relaxed text-muted-foreground [animation-delay:200ms]">
-            A living memorabilia archive for 107 physicians who began together in Berhampur
+            A living memorabilia archive for all physicians who began together in Berhampur
             — portraits, birthdays, postings, families and the certificates that mark a
             life in medicine. Every batchmate carries their own colour in the spectrum.
           </p>
@@ -94,7 +94,7 @@ function LoginPage() {
 
           <dl className="mt-10 grid animate-fade-up grid-cols-3 gap-3 sm:max-w-md [animation-delay:300ms]">
             {[
-              { icon: Users, k: "107", v: "Batchmates" },
+              { icon: Users, k: "All", v: "Batchmates" },
               { icon: Cake, k: "365", v: "Birthdays" },
               { icon: Award, k: "∞", v: "Milestones" },
             ].map(({ icon: Icon, k, v }) => (
