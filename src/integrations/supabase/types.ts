@@ -14,7 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      members: {
+        Row: {
+          address: string
+          awards: string
+          birth_day: number | null
+          birth_month: number | null
+          certificates: Json
+          created_at: string
+          current_position: string
+          family: string
+          habits: string
+          id: number
+          name: string
+          photo_url: string
+          profession: string
+          profile_claimed: boolean
+          social_media: string
+          spouse: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          awards?: string
+          birth_day?: number | null
+          birth_month?: number | null
+          certificates?: Json
+          created_at?: string
+          current_position?: string
+          family?: string
+          habits?: string
+          id: number
+          name: string
+          photo_url?: string
+          profession?: string
+          profile_claimed?: boolean
+          social_media?: string
+          spouse?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          awards?: string
+          birth_day?: number | null
+          birth_month?: number | null
+          certificates?: Json
+          created_at?: string
+          current_position?: string
+          family?: string
+          habits?: string
+          id?: number
+          name?: string
+          photo_url?: string
+          profession?: string
+          profile_claimed?: boolean
+          social_media?: string
+          spouse?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
