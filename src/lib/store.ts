@@ -36,8 +36,24 @@ export function memberSpectrum(id: number) {
   };
 }
 
-/** Read an image file and downscale it to a compact data URL for local storage. */
-export function fileToDataUrl(file: File, maxSize = 900): Promise<string> {
+/** Max size (in bytes) any uploaded photo/document is allowed to occupy once stored. */
+export const MAX_UPLOAD_BYTES = 450 * 1024;
+
+function dataUrlByteSize(dataUrl: string): number {
+  const base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+  return Math.ceil((base64.length * 3) / 4);
+}
+
+/**
+ * Read an image file, downscale it, and compress it until it fits within
+ * maxBytes. Rejects with a clear message if it still doesn't fit even at
+ * the smallest acceptable quality/size.
+ */
+export function fileToDataUrl(
+  file: File,
+  maxSize = 900,
+  maxBytes = MAX_UPLOAD_BYTES,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("read failed"));
@@ -45,14 +61,32 @@ export function fileToDataUrl(file: File, maxSize = 900): Promise<string> {
       const img = new Image();
       img.onerror = () => reject(new Error("decode failed"));
       img.onload = () => {
-        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return resolve(String(reader.result));
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
+        const dimensionSteps = [maxSize, maxSize * 0.75, maxSize * 0.55, maxSize * 0.4];
+        const qualitySteps = [0.82, 0.68, 0.55, 0.4];
+
+        for (const dim of dimensionSteps) {
+          const scale = Math.min(1, dim / Math.max(img.width, img.height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(String(reader.result));
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          for (const quality of qualitySteps) {
+            const dataUrl = canvas.toDataURL("image/jpeg", quality);
+            if (dataUrlByteSize(dataUrl) <= maxBytes) {
+              resolve(dataUrl);
+              return;
+            }
+          }
+        }
+
+        reject(
+          new Error(
+            `This photo is still over ${Math.round(maxBytes / 1024)} KB even after compression — please choose a smaller or simpler image.`,
+          ),
+        );
       };
       img.src = String(reader.result);
     };

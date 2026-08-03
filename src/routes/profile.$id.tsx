@@ -56,6 +56,7 @@ function Profile() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [photo, setPhoto] = useState("");
+  const [photoError, setPhotoError] = useState("");
   const [saved, setSaved] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
@@ -90,7 +91,14 @@ function Profile() {
   async function handlePhoto(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhoto(await fileToDataUrl(file, 700));
+    setPhotoError("");
+    try {
+      setPhoto(await fileToDataUrl(file, 700));
+    } catch (err) {
+      setPhotoError(
+        err instanceof Error ? err.message : "Couldn't process that photo. Please try another.",
+      );
+    }
     e.target.value = "";
   }
 
@@ -263,6 +271,12 @@ function Profile() {
                     <Camera size={15} /> Upload
                   </button>
                 </div>
+                <p className="mt-1.5 text-[0.65rem] text-muted-foreground">
+                  Uploaded photos are automatically compressed to fit under 450 KB.
+                </p>
+                {photoError && (
+                  <p className="mt-1.5 text-xs text-destructive">{photoError}</p>
+                )}
               </div>
 
               <div className="flex gap-2 pt-2">
@@ -276,6 +290,7 @@ function Profile() {
                   onClick={() => {
                     setForm(member as unknown as Record<string, unknown>);
                     setPhoto(member.photo_url);
+                    setPhotoError("");
                     setEditing(false);
                   }}
                   className="flex-1 rounded-xl bg-secondary py-2.5 font-semibold text-secondary-foreground transition hover:bg-secondary/80"
