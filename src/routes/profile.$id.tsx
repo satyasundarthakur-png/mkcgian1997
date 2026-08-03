@@ -21,14 +21,14 @@ import { EcgLine } from "@/components/EcgLine";
 import {
   fileToDataUrl,
   getMembers,
-  getRole,
   memberSpectrum,
   MONTH_NAMES,
   updateMember,
   StorageUnavailableError,
   type Member,
-  type Role,
 } from "@/lib/store";
+import { claimMember, useAuth } from "@/lib/auth";
+
 
 export const Route = createFileRoute("/profile/$id")({
   head: () => ({
@@ -79,7 +79,7 @@ function Profile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const router = useRouter();
-  const [role, setRole] = useState<Role | null>(null);
+  const { user, isAdmin, myMemberId, loading: authLoading, refresh } = useAuth();
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -90,16 +90,17 @@ function Profile() {
   const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [claiming, setClaiming] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const r = getRole();
-    if (!r) {
+    if (authLoading) return;
+    if (!user) {
       navigate({ to: "/" });
       return;
     }
-    setRole(r);
     let cancelled = false;
+
     getMembers()
       .then((members) => {
         if (cancelled) return;
@@ -146,7 +147,26 @@ function Profile() {
   }
 
   const c = memberSpectrum(member.id);
-  const canEdit = role === "member" || role === "admin";
+  const isMine = Boolean(user && member.user_id === user.id);
+  const canEdit = isMine || isAdmin;
+  const canClaim = !isAdmin && !member.user_id && myMemberId === null;
+
+  async function handleClaim() {
+    if (!member || !user) return;
+    setClaiming(true);
+    setSaveError("");
+    try {
+      await claimMember(member.id, user.id);
+      await refresh();
+      const members = await getMembers();
+      setMember(members.find((m) => m.id === member.id) ?? member);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Couldn't claim this profile.");
+    } finally {
+      setClaiming(false);
+    }
+  }
+
 
   function handleChange(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));

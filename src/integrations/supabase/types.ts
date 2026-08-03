@@ -14,6 +14,18 @@ export type Database = {
   }
   public: {
     Tables: {
+      admins: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           address: string
@@ -33,6 +45,7 @@ export type Database = {
           social_media: string
           spouse: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address?: string
@@ -52,6 +65,7 @@ export type Database = {
           social_media?: string
           spouse?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address?: string
@@ -71,6 +85,7 @@ export type Database = {
           social_media?: string
           spouse?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -79,7 +94,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

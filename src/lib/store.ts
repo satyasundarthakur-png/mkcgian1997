@@ -9,29 +9,8 @@ export class StorageUnavailableError extends Error {}
 const STORAGE_BLOCKED_MESSAGE =
   "Your browser is blocking storage for this site — this happens most often in private/incognito mode or an app's built-in browser (e.g. opening the link inside WhatsApp or Instagram). Please open this link in your regular browser (Chrome, Safari, etc.) and try again.";
 
-function safeGet(store: Storage, key: string): string | null {
-  try {
-    return store.getItem(key);
-  } catch {
-    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
-  }
-}
+export const STORAGE_HELP_MESSAGE = STORAGE_BLOCKED_MESSAGE;
 
-function safeSet(store: Storage, key: string, value: string) {
-  try {
-    store.setItem(key, value);
-  } catch {
-    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
-  }
-}
-
-function safeRemove(store: Storage, key: string) {
-  try {
-    store.removeItem(key);
-  } catch {
-    // best-effort; nothing meaningful to surface on logout
-  }
-}
 
 export type Member = {
   id: number;
@@ -47,16 +26,18 @@ export type Member = {
   social_media: string;
   photo_url: string;
   profile_claimed: boolean;
+  user_id?: string | null;
 };
 
 export type Role = "member" | "admin";
 
-const AUTH_KEY = "mkcgian1997_auth_v1";
+
 
 /** Only the columns the app actually uses (the table also has legacy
  * awards/certificates columns that the UI no longer surfaces). */
 const MEMBER_COLUMNS =
-  "id,name,birth_month,birth_day,address,spouse,habits,profession,current_position,family,social_media,photo_url,profile_claimed";
+  "id,name,birth_month,birth_day,address,spouse,habits,profession,current_position,family,social_media,photo_url,profile_claimed,user_id";
+
 
 const seed = seedMembers as unknown as Member[];
 
@@ -181,35 +162,8 @@ export async function resetToSeed(): Promise<void> {
   await replaceAllMembers(seed);
 }
 
-// --- Auth (simple shared-password model, unchanged) ---
+// --- Auth now lives in src/lib/auth.ts (real per-person Supabase sign-in) ---
 
-const MEMBER_PASSWORD = "mkcgian1997";
-const ADMIN_PASSWORD = "mkcgian1997admin";
-
-export function login(password: string): Role | null {
-  if (password === ADMIN_PASSWORD) {
-    safeSet(sessionStorage, AUTH_KEY, "admin");
-    return "admin";
-  }
-  if (password === MEMBER_PASSWORD) {
-    safeSet(sessionStorage, AUTH_KEY, "member");
-    return "member";
-  }
-  return null;
-}
-
-export function logout() {
-  if (typeof window !== "undefined") safeRemove(sessionStorage, AUTH_KEY);
-}
-
-export function getRole(): Role | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return safeGet(sessionStorage, AUTH_KEY) as Role | null;
-  } catch {
-    return null;
-  }
-}
 
 export const MONTH_NAMES = [
   "",

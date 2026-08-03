@@ -2,16 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trash2, Plus, LogOut, Download, Upload } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { signOut, useAuth } from "@/lib/auth";
 import {
   getMembers,
-  getRole,
-  logout,
   resetToSeed,
   insertMember,
   deleteMemberRow,
   replaceAllMembers,
   type Member,
 } from "@/lib/store";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -40,13 +40,16 @@ function Admin() {
   const [loadError, setLoadError] = useState("");
   const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { isAdmin, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (getRole() !== "admin") {
+    if (authLoading) return;
+    if (!isAdmin) {
       navigate({ to: "/" });
       return;
     }
     let cancelled = false;
+
     getMembers()
       .then((data) => {
         if (!cancelled) setMembers(data);
@@ -159,10 +162,11 @@ function Admin() {
           </Link>
           <ThemeToggle />
           <button
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await signOut();
               navigate({ to: "/" });
             }}
+
             className="flex items-center gap-1"
           >
             <LogOut size={16} /> Logout

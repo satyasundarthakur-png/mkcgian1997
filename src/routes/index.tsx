@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Lock, Sparkles, Users, Cake, Award } from "lucide-react";
-import { login, StorageUnavailableError } from "@/lib/store";
+import { signInWithEmail, signUpWithEmail, useAuth } from "@/lib/auth";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with the batch password to browse batchmate profiles, photographs and achievements.",
+          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with your own account to browse batchmate profiles, photographs and achievements.",
       },
       { property: "og:title", content: "MKCGIAN 1997 — MBBS Batch Reunion Directory" },
       {
@@ -31,27 +31,43 @@ export const Route = createFileRoute("/")({
 const SPECTRUM = Array.from({ length: 24 }, (_, i) => (i * 137.508) % 360);
 
 function LoginPage() {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (!loading && user) navigate({ to: "/directory" });
+  }, [loading, user, navigate]);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setNotice("");
+    setBusy(true);
     try {
-      const role = login(password);
-      if (!role) {
-        setError("That password doesn't match our records.");
-        return;
+      if (mode === "signup") {
+        const data = await signUpWithEmail(email, password);
+        if (!data.session) {
+          setNotice("Check your email to confirm your account, then sign in.");
+          setMode("signin");
+          return;
+        }
+      } else {
+        await signInWithEmail(email, password);
       }
-      navigate({ to: role === "admin" ? "/admin" : "/directory" });
+      navigate({ to: "/directory" });
     } catch (err) {
-      setError(
-        err instanceof StorageUnavailableError
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
     }
   }
+
 
   return (
     <main className="min-h-screen bg-cream paper-grain">
@@ -120,7 +136,7 @@ function LoginPage() {
           </dl>
         </section>
 
-        {/* Login card */}
+        {/* Auth card */}
         <section className="animate-fade-up lg:justify-self-end lg:w-full lg:max-w-sm [animation-delay:150ms]">
           <form
             onSubmit={handleSubmit}
@@ -134,21 +150,47 @@ function LoginPage() {
               </span>
             </div>
 
-            <h2 className="font-display mt-4 text-3xl text-ink">Enter the reunion</h2>
+            <h2 className="font-display mt-4 text-3xl text-ink">
+              {mode === "signin" ? "Welcome back" : "Create your account"}
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Use the batch password shared in the group.
+              {mode === "signin"
+                ? "Sign in with your own email and password."
+                : "Register once, then claim your own profile in the directory."}
             </p>
 
             <label
-              htmlFor="pw"
+              htmlFor="email"
               className="mt-6 block text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
             >
-              Batch password
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
+              placeholder="you@example.com"
+              className="input-glow mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-gold/40"
+            />
+
+            <label
+              htmlFor="pw"
+              className="mt-4 block text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+            >
+              Password
             </label>
             <input
               id="pw"
               type="password"
-              autoComplete="current-password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              required
+              minLength={6}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -158,21 +200,37 @@ function LoginPage() {
               className="input-glow mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 tracking-widest outline-none focus:ring-2 focus:ring-gold/40"
             />
             {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+            {notice && <p className="mt-2 text-sm text-maroon">{notice}</p>}
 
             <button
               type="submit"
-              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg active:translate-y-0"
+              disabled={busy}
+              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg active:translate-y-0 disabled:pointer-events-none disabled:opacity-70"
             >
               <Sparkles size={16} className="text-gold transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-              Open the directory
+              {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
             </button>
 
-            <p className="mt-5 text-center text-xs leading-relaxed text-muted-foreground">
-              Batchmate password unlocks browsing and profile editing. The admin password
-              unlocks full management.
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setError("");
+                setNotice("");
+              }}
+              className="mt-4 w-full text-center text-xs text-muted-foreground underline-offset-4 hover:underline"
+            >
+              {mode === "signin"
+                ? "New here? Create an account"
+                : "Already registered? Sign in"}
+            </button>
+
+            <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
+              Each batchmate signs in personally and can claim and edit their own profile.
             </p>
           </form>
         </section>
+
       </div>
 
       {/* About the college */}
