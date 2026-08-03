@@ -147,7 +147,26 @@ function Profile() {
   }
 
   const c = memberSpectrum(member.id);
-  const canEdit = role === "member" || role === "admin";
+  const isMine = Boolean(user && member.user_id === user.id);
+  const canEdit = isMine || isAdmin;
+  const canClaim = !isAdmin && !member.user_id && myMemberId === null;
+
+  async function handleClaim() {
+    if (!member || !user) return;
+    setClaiming(true);
+    setSaveError("");
+    try {
+      await claimMember(member.id, user.id);
+      await refresh();
+      const members = await getMembers();
+      setMember(members.find((m) => m.id === member.id) ?? member);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "Couldn't claim this profile.");
+    } finally {
+      setClaiming(false);
+    }
+  }
+
 
   function handleChange(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
