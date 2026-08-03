@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Lock, Sparkles, Users, Cake, Award } from "lucide-react";
-import { login, StorageUnavailableError } from "@/lib/store";
+import { signInWithEmail, signUpWithEmail, useAuth } from "@/lib/auth";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with the batch password to browse batchmate profiles, photographs and achievements.",
+          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with your own account to browse batchmate profiles, photographs and achievements.",
       },
       { property: "og:title", content: "MKCGIAN 1997 — MBBS Batch Reunion Directory" },
       {
@@ -31,27 +31,43 @@ export const Route = createFileRoute("/")({
 const SPECTRUM = Array.from({ length: 24 }, (_, i) => (i * 137.508) % 360);
 
 function LoginPage() {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (!loading && user) navigate({ to: "/directory" });
+  }, [loading, user, navigate]);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setNotice("");
+    setBusy(true);
     try {
-      const role = login(password);
-      if (!role) {
-        setError("That password doesn't match our records.");
-        return;
+      if (mode === "signup") {
+        const data = await signUpWithEmail(email, password);
+        if (!data.session) {
+          setNotice("Check your email to confirm your account, then sign in.");
+          setMode("signin");
+          return;
+        }
+      } else {
+        await signInWithEmail(email, password);
       }
-      navigate({ to: role === "admin" ? "/admin" : "/directory" });
+      navigate({ to: "/directory" });
     } catch (err) {
-      setError(
-        err instanceof StorageUnavailableError
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
     }
   }
+
 
   return (
     <main className="min-h-screen bg-cream paper-grain">
