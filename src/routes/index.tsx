@@ -166,6 +166,27 @@ function LoginPage() {
           </form>
         </section>
       </div>
+
+      {/* About the college */}
+      <section className="mx-auto max-w-4xl animate-fade-up px-5 pb-16 text-center [animation-delay:350ms]">
+        <div className="gold-rule mx-auto h-px w-24" />
+        <p className="mt-5 text-[0.68rem] font-semibold uppercase tracking-[0.3em] text-gold">
+          About the College
+        </p>
+        <h2 className="font-display mt-3 text-2xl text-maroon sm:text-3xl">
+          Maharaja Krishna Chandra Gajapati Medical College &amp; Hospital
+        </h2>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          Established by the Government of Odisha's Department of Health &amp; Family
+          Welfare in Berhampur, MKCG Medical College is named after Maharaja Krishna
+          Chandra Gajapati of Paralakhemundi, in recognition of his contributions to
+          education and healthcare in the region. Undergraduate teaching began in 1962,
+          and the attached hospital opened in 1966 to serve southern Odisha. Affiliated
+          with Berhampur University and recognised by the National Medical Commission,
+          the college remains one of Odisha's leading centres for medical education,
+          patient care and research.
+        </p>
+      </section>
     </main>
   );
 }
