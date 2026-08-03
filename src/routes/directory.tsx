@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut, Award, Camera, Stethoscope } from "lucide-react";
+import { Search, Cake, LogOut, Camera, Stethoscope } from "lucide-react";
 import {
   getMembers,
   getRole,
@@ -124,7 +124,6 @@ function Directory() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((m, i) => {
             const c = memberSpectrum(m.id);
-            const certs = m.certificates?.length ?? 0;
             return (
               <Link
                 key={m.id}
@@ -168,9 +167,6 @@ function Directory() {
                 <div className="flex items-center gap-3 border-t border-border/70 px-4 py-2 text-[0.7rem] text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Camera size={12} /> {m.photo_url ? "Portrait" : "No photo"}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Award size={12} /> {certs} certificate{certs === 1 ? "" : "s"}
                   </span>
                 </div>
               </Link>

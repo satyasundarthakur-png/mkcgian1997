@@ -1,7 +1,5 @@
 import seedMembers from "@/data/members.json";
 
-export type Certificate = { id: string; url: string; title: string };
-
 export type Member = {
   id: number;
   name: string;
@@ -16,7 +14,6 @@ export type Member = {
   awards: string;
   social_media: string;
   photo_url: string;
-  certificates?: Certificate[];
   profile_claimed: boolean;
 };
 
