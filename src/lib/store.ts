@@ -183,35 +183,8 @@ export async function resetToSeed(): Promise<void> {
   await replaceAllMembers(seed);
 }
 
-// --- Auth (simple shared-password model, unchanged) ---
+// --- Auth now lives in src/lib/auth.ts (real per-person Supabase sign-in) ---
 
-const MEMBER_PASSWORD = "mkcgian1997";
-const ADMIN_PASSWORD = "mkcgian1997admin";
-
-export function login(password: string): Role | null {
-  if (password === ADMIN_PASSWORD) {
-    safeSet(sessionStorage, AUTH_KEY, "admin");
-    return "admin";
-  }
-  if (password === MEMBER_PASSWORD) {
-    safeSet(sessionStorage, AUTH_KEY, "member");
-    return "member";
-  }
-  return null;
-}
-
-export function logout() {
-  if (typeof window !== "undefined") safeRemove(sessionStorage, AUTH_KEY);
-}
-
-export function getRole(): Role | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return safeGet(sessionStorage, AUTH_KEY) as Role | null;
-  } catch {
-    return null;
-  }
-}
 
 export const MONTH_NAMES = [
   "",
