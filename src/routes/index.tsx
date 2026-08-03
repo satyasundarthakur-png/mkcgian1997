@@ -120,7 +120,7 @@ function LoginPage() {
           </dl>
         </section>
 
-        {/* Login card */}
+        {/* Auth card */}
         <section className="animate-fade-up lg:justify-self-end lg:w-full lg:max-w-sm [animation-delay:150ms]">
           <form
             onSubmit={handleSubmit}
@@ -134,21 +134,47 @@ function LoginPage() {
               </span>
             </div>
 
-            <h2 className="font-display mt-4 text-3xl text-ink">Enter the reunion</h2>
+            <h2 className="font-display mt-4 text-3xl text-ink">
+              {mode === "signin" ? "Welcome back" : "Create your account"}
+            </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Use the batch password shared in the group.
+              {mode === "signin"
+                ? "Sign in with your own email and password."
+                : "Register once, then claim your own profile in the directory."}
             </p>
 
             <label
-              htmlFor="pw"
+              htmlFor="email"
               className="mt-6 block text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
             >
-              Batch password
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+              }}
+              placeholder="you@example.com"
+              className="input-glow mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 outline-none focus:ring-2 focus:ring-gold/40"
+            />
+
+            <label
+              htmlFor="pw"
+              className="mt-4 block text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-muted-foreground"
+            >
+              Password
             </label>
             <input
               id="pw"
               type="password"
-              autoComplete="current-password"
+              autoComplete={mode === "signin" ? "current-password" : "new-password"}
+              required
+              minLength={6}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -158,21 +184,37 @@ function LoginPage() {
               className="input-glow mt-2 w-full rounded-xl border border-input bg-background px-4 py-3 tracking-widest outline-none focus:ring-2 focus:ring-gold/40"
             />
             {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+            {notice && <p className="mt-2 text-sm text-maroon">{notice}</p>}
 
             <button
               type="submit"
-              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg active:translate-y-0"
+              disabled={busy}
+              className="group mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg active:translate-y-0 disabled:pointer-events-none disabled:opacity-70"
             >
               <Sparkles size={16} className="text-gold transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-              Open the directory
+              {busy ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
             </button>
 
-            <p className="mt-5 text-center text-xs leading-relaxed text-muted-foreground">
-              Batchmate password unlocks browsing and profile editing. The admin password
-              unlocks full management.
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "signin" ? "signup" : "signin");
+                setError("");
+                setNotice("");
+              }}
+              className="mt-4 w-full text-center text-xs text-muted-foreground underline-offset-4 hover:underline"
+            >
+              {mode === "signin"
+                ? "New here? Create an account"
+                : "Already registered? Sign in"}
+            </button>
+
+            <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground">
+              Each batchmate signs in personally and can claim and edit their own profile.
             </p>
           </form>
         </section>
+
       </div>
 
       {/* About the college */}
