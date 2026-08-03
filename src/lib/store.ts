@@ -1,5 +1,36 @@
 import seedMembers from "@/data/members.json";
 
+/** Thrown when the browser blocks read/write access to local/session storage
+ * (common in private/incognito mode or in-app browsers like WhatsApp/Instagram). */
+export class StorageUnavailableError extends Error {}
+
+const STORAGE_BLOCKED_MESSAGE =
+  "Your browser is blocking storage for this site — this happens most often in private/incognito mode or an app's built-in browser (e.g. opening the link inside WhatsApp or Instagram). Please open this link in your regular browser (Chrome, Safari, etc.) and try again.";
+
+function safeGet(store: Storage, key: string): string | null {
+  try {
+    return store.getItem(key);
+  } catch {
+    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
+  }
+}
+
+function safeSet(store: Storage, key: string, value: string) {
+  try {
+    store.setItem(key, value);
+  } catch {
+    throw new StorageUnavailableError(STORAGE_BLOCKED_MESSAGE);
+  }
+}
+
+function safeRemove(store: Storage, key: string) {
+  try {
+    store.removeItem(key);
+  } catch {
+    // best-effort; nothing meaningful to surface on logout
+  }
+}
+
 export type Member = {
   id: number;
   name: string;
@@ -97,7 +128,7 @@ export function fileToDataUrl(
 
 export function getMembers(): Member[] {
   if (typeof window === "undefined") return seed;
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = safeGet(localStorage, STORAGE_KEY);
   if (raw) {
     try {
       return JSON.parse(raw) as Member[];
@@ -105,12 +136,12 @@ export function getMembers(): Member[] {
       // fall through to seed
     }
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
+  safeSet(localStorage, STORAGE_KEY, JSON.stringify(seed));
   return seed;
 }
 
 export function saveMembers(members: Member[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(members));
+  safeSet(localStorage, STORAGE_KEY, JSON.stringify(members));
 }
 
 export function updateMember(id: number, updates: Partial<Member>): Member | null {
@@ -133,23 +164,27 @@ const ADMIN_PASSWORD = "mkcgian1997admin";
 
 export function login(password: string): Role | null {
   if (password === ADMIN_PASSWORD) {
-    sessionStorage.setItem(AUTH_KEY, "admin");
+    safeSet(sessionStorage, AUTH_KEY, "admin");
     return "admin";
   }
   if (password === MEMBER_PASSWORD) {
-    sessionStorage.setItem(AUTH_KEY, "member");
+    safeSet(sessionStorage, AUTH_KEY, "member");
     return "member";
   }
   return null;
 }
 
 export function logout() {
-  if (typeof window !== "undefined") sessionStorage.removeItem(AUTH_KEY);
+  if (typeof window !== "undefined") safeRemove(sessionStorage, AUTH_KEY);
 }
 
 export function getRole(): Role | null {
   if (typeof window === "undefined") return null;
-  return sessionStorage.getItem(AUTH_KEY) as Role | null;
+  try {
+    return safeGet(sessionStorage, AUTH_KEY) as Role | null;
+  } catch {
+    return null;
+  }
 }
 
 export const MONTH_NAMES = [

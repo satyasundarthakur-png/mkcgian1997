@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Lock, Sparkles, Users, Cake, Award } from "lucide-react";
-import { login } from "@/lib/store";
+import { login, StorageUnavailableError } from "@/lib/store";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
@@ -37,12 +37,20 @@ function LoginPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const role = login(password);
-    if (!role) {
-      setError("That password doesn't match our records.");
-      return;
+    try {
+      const role = login(password);
+      if (!role) {
+        setError("That password doesn't match our records.");
+        return;
+      }
+      navigate({ to: role === "admin" ? "/admin" : "/directory" });
+    } catch (err) {
+      setError(
+        err instanceof StorageUnavailableError
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     }
-    navigate({ to: role === "admin" ? "/admin" : "/directory" });
   }
 
   return (

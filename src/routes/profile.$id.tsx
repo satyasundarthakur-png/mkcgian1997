@@ -25,6 +25,7 @@ import {
   memberSpectrum,
   MONTH_NAMES,
   updateMember,
+  StorageUnavailableError,
   type Member,
   type Role,
 } from "@/lib/store";
@@ -84,6 +85,7 @@ function Profile() {
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [photo, setPhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [saved, setSaved] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
@@ -131,15 +133,24 @@ function Profile() {
 
   function handleSave() {
     if (!member) return;
+    setSaveError("");
     const updates: Partial<Member> = { ...(form as Partial<Member>) };
     updates.birth_month = form["birth_month"] ? Number(form["birth_month"]) : null;
     updates.birth_day = form["birth_day"] ? Number(form["birth_day"]) : null;
     updates.photo_url = photo;
-    const updated = updateMember(member.id, updates);
-    setMember(updated);
-    setEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2200);
+    try {
+      const updated = updateMember(member.id, updates);
+      setMember(updated);
+      setEditing(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2200);
+    } catch (err) {
+      setSaveError(
+        err instanceof StorageUnavailableError
+          ? err.message
+          : "Couldn't save your changes. Please try again.",
+      );
+    }
   }
 
   function cancelEdit() {
@@ -147,6 +158,7 @@ function Profile() {
     setForm(member as unknown as Record<string, unknown>);
     setPhoto(member.photo_url);
     setPhotoError("");
+    setSaveError("");
     setEditing(false);
   }
 
@@ -381,6 +393,11 @@ function Profile() {
                 <X size={15} /> Cancel
               </button>
             </div>
+            {saveError && (
+              <p className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {saveError}
+              </p>
+            )}
           </section>
         )}
       </div>

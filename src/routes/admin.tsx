@@ -8,6 +8,7 @@ import {
   logout,
   resetToSeed,
   saveMembers,
+  StorageUnavailableError,
   type Member,
 } from "@/lib/store";
 
@@ -46,7 +47,15 @@ function Admin() {
 
   function refresh(updated: Member[]) {
     setMembers(updated);
-    saveMembers(updated);
+    try {
+      saveMembers(updated);
+    } catch (err) {
+      alert(
+        err instanceof StorageUnavailableError
+          ? err.message
+          : "Couldn't save changes to this device.",
+      );
+    }
   }
 
   function addMember() {
@@ -149,8 +158,16 @@ function Admin() {
           <button
             onClick={() => {
               if (confirm("Reset ALL data to original seed list? This cannot be undone.")) {
-                resetToSeed();
-                setMembers(getMembers());
+                try {
+                  resetToSeed();
+                  setMembers(getMembers());
+                } catch (err) {
+                  alert(
+                    err instanceof StorageUnavailableError
+                      ? err.message
+                      : "Couldn't reset data on this device.",
+                  );
+                }
               }
             }}
             className="flex items-center gap-1 bg-destructive/10 text-destructive px-3 py-2 rounded-lg text-sm font-semibold"
