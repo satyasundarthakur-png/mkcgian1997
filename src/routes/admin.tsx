@@ -162,10 +162,11 @@ function Admin() {
           </Link>
           <ThemeToggle />
           <button
-            onClick={() => {
-              logout();
+            onClick={async () => {
+              await signOut();
               navigate({ to: "/" });
             }}
+
             className="flex items-center gap-1"
           >
             <LogOut size={16} /> Logout
