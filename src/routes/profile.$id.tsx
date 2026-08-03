@@ -21,14 +21,14 @@ import { EcgLine } from "@/components/EcgLine";
 import {
   fileToDataUrl,
   getMembers,
-  getRole,
   memberSpectrum,
   MONTH_NAMES,
   updateMember,
   StorageUnavailableError,
   type Member,
-  type Role,
 } from "@/lib/store";
+import { claimMember, useAuth } from "@/lib/auth";
+
 
 export const Route = createFileRoute("/profile/$id")({
   head: () => ({
