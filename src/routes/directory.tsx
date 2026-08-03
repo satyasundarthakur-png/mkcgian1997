@@ -106,9 +106,17 @@ function Directory() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ThemeToggle />
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
+              >
+                <ShieldCheck size={15} /> <span className="hidden sm:inline">Admin</span>
+              </Link>
+            )}
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await signOut();
                 navigate({ to: "/" });
               }}
               className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
@@ -116,6 +124,7 @@ function Directory() {
               <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
+
         </div>
         <div className="mx-auto hidden max-w-5xl px-5 pb-3 text-maroon-foreground/40 sm:block">
           <EcgLine className="h-5 w-full" />
