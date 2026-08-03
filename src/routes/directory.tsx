@@ -1,17 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut, Camera } from "lucide-react";
+import { Search, Cake, LogOut, Camera, ShieldCheck } from "lucide-react";
 import {
   getMembers,
-  getRole,
-  logout,
   memberSpectrum,
   MONTH_NAMES,
   type Member,
 } from "@/lib/store";
+import { signOut, useAuth } from "@/lib/auth";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
+
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
