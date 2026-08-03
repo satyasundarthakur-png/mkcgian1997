@@ -81,11 +81,14 @@ function Profile() {
   const router = useRouter();
   const [role, setRole] = useState<Role | null>(null);
   const [member, setMember] = useState<Member | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [photo, setPhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
@@ -96,11 +99,43 @@ function Profile() {
       return;
     }
     setRole(r);
-    const found = getMembers().find((m) => String(m.id) === id) ?? null;
-    setMember(found);
-    setForm((found ?? {}) as Record<string, unknown>);
-    setPhoto(found?.photo_url ?? "");
+    let cancelled = false;
+    getMembers()
+      .then((members) => {
+        if (cancelled) return;
+        const found = members.find((m) => String(m.id) === id) ?? null;
+        setMember(found);
+        setForm((found ?? {}) as Record<string, unknown>);
+        setPhoto(found?.photo_url ?? "");
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setLoadError(err instanceof Error ? err.message : "Couldn't load this profile.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [id, navigate]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-cream">
+        <p className="text-muted-foreground">Loading profile…</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-cream px-5">
+        <p className="max-w-sm text-center text-sm text-destructive">{loadError}</p>
+      </div>
+    );
+  }
 
   if (!member) {
     return (
@@ -131,15 +166,16 @@ function Profile() {
     e.target.value = "";
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!member) return;
     setSaveError("");
+    setSaving(true);
     const updates: Partial<Member> = { ...(form as Partial<Member>) };
     updates.birth_month = form["birth_month"] ? Number(form["birth_month"]) : null;
     updates.birth_day = form["birth_day"] ? Number(form["birth_day"]) : null;
     updates.photo_url = photo;
     try {
-      const updated = updateMember(member.id, updates);
+      const updated = await updateMember(member.id, updates);
       setMember(updated);
       setEditing(false);
       setSaved(true);
@@ -148,8 +184,12 @@ function Profile() {
       setSaveError(
         err instanceof StorageUnavailableError
           ? err.message
-          : "Couldn't save your changes. Please try again.",
+          : err instanceof Error
+            ? err.message
+            : "Couldn't save your changes. Please try again.",
       );
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -382,13 +422,15 @@ function Profile() {
             <div className="mt-6 flex gap-2">
               <button
                 onClick={handleSave}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg"
+                disabled={saving}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg disabled:pointer-events-none disabled:opacity-70"
               >
-                <Save size={16} /> Save profile
+                <Save size={16} /> {saving ? "Saving…" : "Save profile"}
               </button>
               <button
                 onClick={cancelEdit}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary px-5 py-3 font-semibold text-secondary-foreground transition hover:bg-secondary/80"
+                disabled={saving}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary px-5 py-3 font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:pointer-events-none disabled:opacity-70"
               >
                 <X size={15} /> Cancel
               </button>

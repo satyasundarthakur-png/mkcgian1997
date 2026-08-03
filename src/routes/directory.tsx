@@ -36,6 +36,8 @@ export const Route = createFileRoute("/directory")({
 
 function Directory() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
 
@@ -44,7 +46,24 @@ function Directory() {
       navigate({ to: "/" });
       return;
     }
-    setMembers(getMembers());
+    let cancelled = false;
+    getMembers()
+      .then((data) => {
+        if (!cancelled) setMembers(data);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error ? err.message : "Couldn't load the batch directory.",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const filtered = useMemo(() => {
@@ -101,6 +120,18 @@ function Directory() {
       </header>
 
       <div className="mx-auto max-w-5xl px-5 py-6">
+        {loadError && (
+          <div className="mb-5 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
+            {loadError}
+          </div>
+        )}
+
+        {loading ? (
+          <p className="py-16 text-center text-sm text-muted-foreground">
+            Loading the batch directory…
+          </p>
+        ) : (
+          <>
         {todaysBirthdays.length > 0 && (
           <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
             <Cake size={20} className="shrink-0 animate-float-soft text-maroon" />
@@ -186,6 +217,8 @@ function Directory() {
           <p className="py-16 text-center text-sm text-muted-foreground">
             No batchmate matches “{query}”.
           </p>
+        )}
+          </>
         )}
       </div>
     </div>

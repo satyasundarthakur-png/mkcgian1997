@@ -1,7 +1,9 @@
+import { supabase } from "@/integrations/supabase/client";
 import seedMembers from "@/data/members.json";
 
-/** Thrown when the browser blocks read/write access to local/session storage
- * (common in private/incognito mode or in-app browsers like WhatsApp/Instagram). */
+/** Thrown when the browser blocks read/write access to session storage
+ * (common in private/incognito mode or in-app browsers like WhatsApp/Instagram).
+ * Only used for the local password-gate flag — member data itself lives in Supabase. */
 export class StorageUnavailableError extends Error {}
 
 const STORAGE_BLOCKED_MESSAGE =
@@ -42,7 +44,6 @@ export type Member = {
   profession: string;
   current_position: string;
   family: string;
-  awards: string;
   social_media: string;
   photo_url: string;
   profile_claimed: boolean;
@@ -50,8 +51,12 @@ export type Member = {
 
 export type Role = "member" | "admin";
 
-const STORAGE_KEY = "mkcgian1997_members_v1";
 const AUTH_KEY = "mkcgian1997_auth_v1";
+
+/** Only the columns the app actually uses (the table also has legacy
+ * awards/certificates columns that the UI no longer surfaces). */
+const MEMBER_COLUMNS =
+  "id,name,birth_month,birth_day,address,spouse,habits,profession,current_position,family,social_media,photo_url,profile_claimed";
 
 const seed = seedMembers as unknown as Member[];
 
@@ -125,39 +130,58 @@ export function fileToDataUrl(
   });
 }
 
+// --- Member data (Supabase-backed — shared across every device) ---
 
-export function getMembers(): Member[] {
-  if (typeof window === "undefined") return seed;
-  const raw = safeGet(localStorage, STORAGE_KEY);
-  if (raw) {
-    try {
-      return JSON.parse(raw) as Member[];
-    } catch {
-      // fall through to seed
-    }
+export async function getMembers(): Promise<Member[]> {
+  const { data, error } = await supabase
+    .from("members")
+    .select(MEMBER_COLUMNS)
+    .order("id", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as Member[];
+}
+
+export async function updateMember(id: number, updates: Partial<Member>): Promise<Member | null> {
+  const { data, error } = await supabase
+    .from("members")
+    .update({ ...updates, profile_claimed: true })
+    .eq("id", id)
+    .select(MEMBER_COLUMNS)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as unknown as Member;
+}
+
+export async function insertMember(member: Member): Promise<Member> {
+  const { data, error } = await supabase
+    .from("members")
+    .insert(member)
+    .select(MEMBER_COLUMNS)
+    .single();
+  if (error) throw new Error(error.message);
+  return data as unknown as Member;
+}
+
+export async function deleteMemberRow(id: number): Promise<void> {
+  const { error } = await supabase.from("members").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
+/** Wipes and replaces every row — used for full backup import and reset-to-seed. */
+export async function replaceAllMembers(members: Member[]): Promise<void> {
+  const { error: delErr } = await supabase.from("members").delete().gte("id", 0);
+  if (delErr) throw new Error(delErr.message);
+  if (members.length) {
+    const { error: insErr } = await supabase.from("members").insert(members);
+    if (insErr) throw new Error(insErr.message);
   }
-  safeSet(localStorage, STORAGE_KEY, JSON.stringify(seed));
-  return seed;
 }
 
-export function saveMembers(members: Member[]) {
-  safeSet(localStorage, STORAGE_KEY, JSON.stringify(members));
+export async function resetToSeed(): Promise<void> {
+  await replaceAllMembers(seed);
 }
 
-export function updateMember(id: number, updates: Partial<Member>): Member | null {
-  const members = getMembers();
-  const idx = members.findIndex((m) => m.id === id);
-  const existing = members[idx];
-  if (idx === -1 || !existing) return null;
-  const updated: Member = { ...existing, ...updates, profile_claimed: true };
-  members[idx] = updated;
-  saveMembers(members);
-  return updated;
-}
-
-export function resetToSeed() {
-  saveMembers(seed);
-}
+// --- Auth (simple shared-password model, unchanged) ---
 
 const MEMBER_PASSWORD = "mkcgian1997";
 const ADMIN_PASSWORD = "mkcgian1997admin";
