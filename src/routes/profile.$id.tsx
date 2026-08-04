@@ -14,6 +14,7 @@ import {
   Share2,
   Cake,
   Sparkles,
+  BadgeCheck,
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -24,7 +25,6 @@ import {
   memberSpectrum,
   MONTH_NAMES,
   updateMember,
-  StorageUnavailableError,
   type Member,
 } from "@/lib/store";
 import { claimMember, useAuth } from "@/lib/auth";
@@ -120,7 +120,7 @@ function Profile() {
     return () => {
       cancelled = true;
     };
-  }, [id, navigate]);
+  }, [id, navigate, user, authLoading]);
 
   if (loading) {
     return (
@@ -202,11 +202,7 @@ function Profile() {
       setTimeout(() => setSaved(false), 2200);
     } catch (err) {
       setSaveError(
-        err instanceof StorageUnavailableError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Couldn't save your changes. Please try again.",
+        err instanceof Error ? err.message : "Couldn't save your changes. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -328,7 +324,22 @@ function Profile() {
                 <Pencil size={14} /> Edit profile
               </button>
             )}
+
+            {canClaim && (
+              <button
+                onClick={handleClaim}
+                disabled={claiming}
+                className="flex shrink-0 items-center gap-2 rounded-full border border-gold bg-gold/10 px-4 py-2 text-sm font-semibold text-maroon shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-gold/20 hover:shadow-md disabled:pointer-events-none disabled:opacity-70"
+              >
+                <BadgeCheck size={14} /> {claiming ? "Claiming…" : "This is me"}
+              </button>
+            )}
           </div>
+          {!editing && saveError && (
+            <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-center text-sm text-destructive sm:text-left">
+              {saveError}
+            </p>
+          )}
         </div>
 
         {/* Facts */}
@@ -378,7 +389,7 @@ function Profile() {
 
             {saved && (
               <p className="mt-5 text-center text-sm font-medium text-maroon">
-                ✓ Saved to this device.
+                ✓ Saved — visible to everyone now.
               </p>
             )}
           </section>

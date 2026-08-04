@@ -65,7 +65,7 @@ function Admin() {
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, isAdmin, authLoading]);
 
   async function addMember() {
     const nextId = members.length ? Math.max(...members.map((m) => m.id)) + 1 : 1;

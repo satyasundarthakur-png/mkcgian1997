@@ -1,16 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import seedMembers from "@/data/members.json";
 
-/** Thrown when the browser blocks read/write access to session storage
- * (common in private/incognito mode or in-app browsers like WhatsApp/Instagram).
- * Only used for the local password-gate flag — member data itself lives in Supabase. */
-export class StorageUnavailableError extends Error {}
-
-const STORAGE_BLOCKED_MESSAGE =
-  "Your browser is blocking storage for this site — this happens most often in private/incognito mode or an app's built-in browser (e.g. opening the link inside WhatsApp or Instagram). Please open this link in your regular browser (Chrome, Safari, etc.) and try again.";
-
-export const STORAGE_HELP_MESSAGE = STORAGE_BLOCKED_MESSAGE;
-
 
 export type Member = {
   id: number;

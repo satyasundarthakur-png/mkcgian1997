@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut, Camera, ShieldCheck } from "lucide-react";
+import { Search, Cake, LogOut, Camera, ShieldCheck, BadgeCheck } from "lucide-react";
 import {
   getMembers,
   memberSpectrum,
@@ -144,6 +144,15 @@ function Directory() {
           </p>
         ) : (
           <>
+        {!isAdmin && myMemberId === null && (
+          <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
+            <BadgeCheck size={20} className="shrink-0 text-maroon" />
+            <p className="text-sm font-medium text-maroon">
+              Find your name below and open your profile, then tap “This is me” to claim it.
+            </p>
+          </div>
+        )}
+
         {todaysBirthdays.length > 0 && (
           <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
             <Cake size={20} className="shrink-0 animate-float-soft text-maroon" />
