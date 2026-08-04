@@ -14,7 +14,6 @@ import {
   Share2,
   Cake,
   Sparkles,
-  BadgeCheck,
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -22,13 +21,14 @@ import { EcgLine } from "@/components/EcgLine";
 import {
   fileToDataUrl,
   getMembers,
+  getRole,
   memberSpectrum,
   MONTH_NAMES,
   updateMember,
+  StorageUnavailableError,
   type Member,
+  type Role,
 } from "@/lib/store";
-import { claimMember, useAuth } from "@/lib/auth";
-
 
 export const Route = createFileRoute("/profile/$id")({
   head: () => ({
@@ -79,64 +79,28 @@ function Profile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const router = useRouter();
-  const { user, isAdmin, myMemberId, loading: authLoading, refresh } = useAuth();
+  const [role, setRole] = useState<Role | null>(null);
   const [member, setMember] = useState<Member | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [photo, setPhoto] = useState("");
   const [photoError, setPhotoError] = useState("");
   const [saveError, setSaveError] = useState("");
-  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [claiming, setClaiming] = useState(false);
   const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
+    const r = getRole();
+    if (!r) {
       navigate({ to: "/" });
       return;
     }
-    let cancelled = false;
-
-    getMembers()
-      .then((members) => {
-        if (cancelled) return;
-        const found = members.find((m) => String(m.id) === id) ?? null;
-        setMember(found);
-        setForm((found ?? {}) as Record<string, unknown>);
-        setPhoto(found?.photo_url ?? "");
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setLoadError(err instanceof Error ? err.message : "Couldn't load this profile.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [id, navigate, user, authLoading]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-cream">
-        <p className="text-muted-foreground">Loading profile…</p>
-      </div>
-    );
-  }
-
-  if (loadError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-cream px-5">
-        <p className="max-w-sm text-center text-sm text-destructive">{loadError}</p>
-      </div>
-    );
-  }
+    setRole(r);
+    const found = getMembers().find((m) => String(m.id) === id) ?? null;
+    setMember(found);
+    setForm((found ?? {}) as Record<string, unknown>);
+    setPhoto(found?.photo_url ?? "");
+  }, [id, navigate]);
 
   if (!member) {
     return (
@@ -147,26 +111,7 @@ function Profile() {
   }
 
   const c = memberSpectrum(member.id);
-  const isMine = Boolean(user && member.user_id === user.id);
-  const canEdit = isMine || isAdmin;
-  const canClaim = !isAdmin && !member.user_id && myMemberId === null;
-
-  async function handleClaim() {
-    if (!member || !user) return;
-    setClaiming(true);
-    setSaveError("");
-    try {
-      await claimMember(member.id, user.id);
-      await refresh();
-      const members = await getMembers();
-      setMember(members.find((m) => m.id === member.id) ?? member);
-    } catch (err) {
-      setSaveError(err instanceof Error ? err.message : "Couldn't claim this profile.");
-    } finally {
-      setClaiming(false);
-    }
-  }
-
+  const canEdit = role === "member" || role === "admin";
 
   function handleChange(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -186,26 +131,25 @@ function Profile() {
     e.target.value = "";
   }
 
-  async function handleSave() {
+  function handleSave() {
     if (!member) return;
     setSaveError("");
-    setSaving(true);
     const updates: Partial<Member> = { ...(form as Partial<Member>) };
     updates.birth_month = form["birth_month"] ? Number(form["birth_month"]) : null;
     updates.birth_day = form["birth_day"] ? Number(form["birth_day"]) : null;
     updates.photo_url = photo;
     try {
-      const updated = await updateMember(member.id, updates);
+      const updated = updateMember(member.id, updates);
       setMember(updated);
       setEditing(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2200);
     } catch (err) {
       setSaveError(
-        err instanceof Error ? err.message : "Couldn't save your changes. Please try again.",
+        err instanceof StorageUnavailableError
+          ? err.message
+          : "Couldn't save your changes. Please try again.",
       );
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -324,22 +268,7 @@ function Profile() {
                 <Pencil size={14} /> Edit profile
               </button>
             )}
-
-            {canClaim && (
-              <button
-                onClick={handleClaim}
-                disabled={claiming}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-gold bg-gold/10 px-4 py-2 text-sm font-semibold text-maroon shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-gold/20 hover:shadow-md disabled:pointer-events-none disabled:opacity-70"
-              >
-                <BadgeCheck size={14} /> {claiming ? "Claiming…" : "This is me"}
-              </button>
-            )}
           </div>
-          {!editing && saveError && (
-            <p className="mt-4 rounded-xl bg-destructive/10 px-4 py-3 text-center text-sm text-destructive sm:text-left">
-              {saveError}
-            </p>
-          )}
         </div>
 
         {/* Facts */}
@@ -389,7 +318,7 @@ function Profile() {
 
             {saved && (
               <p className="mt-5 text-center text-sm font-medium text-maroon">
-                ✓ Saved — visible to everyone now.
+                ✓ Saved to this device.
               </p>
             )}
           </section>
@@ -453,15 +382,13 @@ function Profile() {
             <div className="mt-6 flex gap-2">
               <button
                 onClick={handleSave}
-                disabled={saving}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg disabled:pointer-events-none disabled:opacity-70"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg"
               >
-                <Save size={16} /> {saving ? "Saving…" : "Save profile"}
+                <Save size={16} /> Save profile
               </button>
               <button
                 onClick={cancelEdit}
-                disabled={saving}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary px-5 py-3 font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:pointer-events-none disabled:opacity-70"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-secondary px-5 py-3 font-semibold text-secondary-foreground transition hover:bg-secondary/80"
               >
                 <X size={15} /> Cancel
               </button>

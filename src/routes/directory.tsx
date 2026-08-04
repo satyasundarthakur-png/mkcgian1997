@@ -1,17 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Cake, LogOut, Camera, ShieldCheck, BadgeCheck } from "lucide-react";
+import { Search, Cake, LogOut, Camera } from "lucide-react";
 import {
   getMembers,
+  getRole,
+  logout,
   memberSpectrum,
   MONTH_NAMES,
   type Member,
 } from "@/lib/store";
-import { signOut, useAuth } from "@/lib/auth";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
-
 
 export const Route = createFileRoute("/directory")({
   head: () => ({
@@ -36,38 +36,16 @@ export const Route = createFileRoute("/directory")({
 
 function Directory() {
   const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const { user, isAdmin, myMemberId, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (authLoading) return;
-    if (!user) {
+    if (!getRole()) {
       navigate({ to: "/" });
       return;
     }
-    let cancelled = false;
-
-    getMembers()
-      .then((data) => {
-        if (!cancelled) setMembers(data);
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setLoadError(
-            err instanceof Error ? err.message : "Couldn't load the batch directory.",
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate, user, authLoading]);
+    setMembers(getMembers());
+  }, [navigate]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -106,17 +84,9 @@ function Directory() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <ThemeToggle />
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
-              >
-                <ShieldCheck size={15} /> <span className="hidden sm:inline">Admin</span>
-              </Link>
-            )}
             <button
-              onClick={async () => {
-                await signOut();
+              onClick={() => {
+                logout();
                 navigate({ to: "/" });
               }}
               className="flex shrink-0 items-center gap-1.5 rounded-full border border-maroon-foreground/25 px-3 py-1.5 text-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon-foreground/10"
@@ -124,7 +94,6 @@ function Directory() {
               <LogOut size={15} /> <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
-
         </div>
         <div className="mx-auto hidden max-w-5xl px-5 pb-3 text-maroon-foreground/40 sm:block">
           <EcgLine className="h-5 w-full" />
@@ -132,27 +101,6 @@ function Directory() {
       </header>
 
       <div className="mx-auto max-w-5xl px-5 py-6">
-        {loadError && (
-          <div className="mb-5 rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-            {loadError}
-          </div>
-        )}
-
-        {loading ? (
-          <p className="py-16 text-center text-sm text-muted-foreground">
-            Loading the batch directory…
-          </p>
-        ) : (
-          <>
-        {!isAdmin && myMemberId === null && (
-          <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
-            <BadgeCheck size={20} className="shrink-0 text-maroon" />
-            <p className="text-sm font-medium text-maroon">
-              Find your name below and open your profile, then tap “This is me” to claim it.
-            </p>
-          </div>
-        )}
-
         {todaysBirthdays.length > 0 && (
           <div className="mb-5 flex animate-fade-up items-center gap-3 rounded-2xl border border-gold/60 bg-gold/15 p-4">
             <Cake size={20} className="shrink-0 animate-float-soft text-maroon" />
@@ -238,8 +186,6 @@ function Directory() {
           <p className="py-16 text-center text-sm text-muted-foreground">
             No batchmate matches “{query}”.
           </p>
-        )}
-          </>
         )}
       </div>
     </div>
