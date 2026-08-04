@@ -68,7 +68,7 @@ export function memberSpectrum(id: number) {
 }
 
 /** Max size (in bytes) any uploaded photo/document is allowed to occupy once stored. */
-export const MAX_UPLOAD_BYTES = 450 * 1024;
+const MAX_UPLOAD_BYTES = 450 * 1024;
 
 function dataUrlByteSize(dataUrl: string): number {
   const base64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
