@@ -91,39 +91,7 @@ export type Database = {
       }
     }
     Views: {
-      members_directory: {
-        Row: {
-          birth_day: number | null
-          birth_month: number | null
-          current_position: string | null
-          id: number | null
-          name: string | null
-          photo_url: string | null
-          profession: string | null
-          profile_claimed: boolean | null
-        }
-        Insert: {
-          birth_day?: number | null
-          birth_month?: number | null
-          current_position?: string | null
-          id?: number | null
-          name?: string | null
-          photo_url?: string | null
-          profession?: string | null
-          profile_claimed?: boolean | null
-        }
-        Update: {
-          birth_day?: number | null
-          birth_month?: number | null
-          current_position?: string | null
-          id?: number | null
-          name?: string | null
-          photo_url?: string | null
-          profession?: string | null
-          profile_claimed?: boolean | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       [_ in never]: never
