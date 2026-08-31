@@ -201,10 +201,10 @@ export function useClaimMemberMutation() {
 export function useAddMemberMutation() {
   const invalidate = useInvalidate();
   return useMutation({
-    mutationFn: async (name: string) => {
+    mutationFn: async ({ id, name }: { id: number; name: string }) => {
       const { data, error } = await supabase
         .from("members")
-        .insert({ name })
+        .insert({ id, name })
         .select("*")
         .single();
       if (error) throw error;
