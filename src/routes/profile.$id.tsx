@@ -14,21 +14,21 @@ import {
   Share2,
   Cake,
   Sparkles,
+  Loader2,
+  Lock,
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { EcgLine } from "@/components/EcgLine";
+import { fileToDataUrl, memberSpectrum, MONTH_NAMES } from "@/lib/store";
 import {
-  fileToDataUrl,
-  getMembers,
-  getRole,
-  memberSpectrum,
-  MONTH_NAMES,
-  updateMember,
-  StorageUnavailableError,
-  type Member,
-  type Role,
-} from "@/lib/store";
+  useAdminStatusQuery,
+  useClaimMemberMutation,
+  useMemberQuery,
+  useSupabaseAuth,
+  useUpdateMemberMutation,
+  type MemberRow,
+} from "@/lib/store.supabase";
 
 export const Route = createFileRoute("/profile/$id")({
   head: () => ({
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/profile/$id")({
   component: Profile,
 });
 
-const FIELDS: { key: keyof Member; label: string; type?: string }[] = [
+const FIELDS: { key: keyof MemberRow; label: string; type?: string }[] = [
   { key: "name", label: "Full Name" },
   { key: "birth_month", label: "Birth Month (1-12)", type: "number" },
   { key: "birth_day", label: "Birth Day (1-31)", type: "number" },
@@ -65,7 +65,7 @@ const FIELDS: { key: keyof Member; label: string; type?: string }[] = [
 ];
 
 /** Curated display facts (excludes name & birth, which live in the header). */
-const FACTS: { key: keyof Member; label: string; icon: typeof MapPin }[] = [
+const FACTS: { key: keyof MemberRow; label: string; icon: typeof MapPin }[] = [
   { key: "current_position", label: "Current Post", icon: Briefcase },
   { key: "profession", label: "Professional Field", icon: Stethoscope },
   { key: "address", label: "Address / City", icon: MapPin },
@@ -79,8 +79,12 @@ function Profile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
   const router = useRouter();
-  const [role, setRole] = useState<Role | null>(null);
-  const [member, setMember] = useState<Member | null>(null);
+  const { session, loading: authLoading } = useSupabaseAuth();
+  const { data: adminStatus } = useAdminStatusQuery();
+  const { data: detail, isLoading, error } = useMemberQuery(id);
+  const updateMember = useUpdateMemberMutation();
+  const claimMember = useClaimMemberMutation();
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<Record<string, unknown>>({});
   const [photo, setPhoto] = useState("");
@@ -90,28 +94,56 @@ function Profile() {
   const photoInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const r = getRole();
-    if (!r) {
-      navigate({ to: "/" });
-      return;
-    }
-    setRole(r);
-    const found = getMembers().find((m) => String(m.id) === id) ?? null;
-    setMember(found);
-    setForm((found ?? {}) as Record<string, unknown>);
-    setPhoto(found?.photo_url ?? "");
-  }, [id, navigate]);
+    if (!authLoading && !session) navigate({ to: "/" });
+  }, [authLoading, session, navigate]);
 
-  if (!member) {
+  useEffect(() => {
+    if (detail?.kind === "full") {
+      setForm(detail.member as unknown as Record<string, unknown>);
+      setPhoto(detail.member.photo_url);
+    }
+  }, [detail]);
+
+  if (authLoading || isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-cream">
-        <p className="text-muted-foreground">Batchmate not found.</p>
+      <div className="flex min-h-screen items-center justify-center gap-2 bg-cream text-muted-foreground">
+        <Loader2 size={18} className="animate-spin" /> Loading profile…
       </div>
     );
   }
 
-  const c = memberSpectrum(member.id);
-  const canEdit = role === "member" || role === "admin";
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-cream px-6">
+        <p className="text-center text-sm text-destructive">
+          Couldn't load this profile: {(error as Error).message}
+        </p>
+      </div>
+    );
+  }
+
+  if (!detail) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-cream">
+        <p className="text-muted-foreground">Batchmate not found.</p>
+        <button
+          onClick={() => navigate({ to: "/directory" })}
+          className="rounded-xl bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground"
+        >
+          Back to directory
+        </button>
+      </div>
+    );
+  }
+
+  const isFull = detail.kind === "full";
+  const member = detail.member;
+  const memberId = member.id;
+  const c = memberSpectrum(memberId);
+  const isAdmin = !!adminStatus?.isAdmin;
+  const isMine = isFull && (member as MemberRow).user_id === session?.user.id;
+  const canEdit = isFull && (isMine || isAdmin);
+  const isUnclaimed = !member.profile_claimed;
 
   function handleChange(key: string, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -131,32 +163,33 @@ function Profile() {
     e.target.value = "";
   }
 
-  function handleSave() {
-    if (!member) return;
+  async function handleSave() {
     setSaveError("");
-    const updates: Partial<Member> = { ...(form as Partial<Member>) };
+    const updates: Partial<MemberRow> = {};
+    for (const f of FIELDS) {
+      if (f.key === "birth_month" || f.key === "birth_day") continue;
+      updates[f.key] = (form[f.key] as never) ?? ("" as never);
+    }
     updates.birth_month = form["birth_month"] ? Number(form["birth_month"]) : null;
     updates.birth_day = form["birth_day"] ? Number(form["birth_day"]) : null;
     updates.photo_url = photo;
     try {
-      const updated = updateMember(member.id, updates);
-      setMember(updated);
+      await updateMember.mutateAsync({ id: memberId, updates });
       setEditing(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2200);
     } catch (err) {
       setSaveError(
-        err instanceof StorageUnavailableError
-          ? err.message
-          : "Couldn't save your changes. Please try again.",
+        err instanceof Error ? err.message : "Couldn't save your changes. Please try again.",
       );
     }
   }
 
   function cancelEdit() {
-    if (!member) return;
-    setForm(member as unknown as Record<string, unknown>);
-    setPhoto(member.photo_url);
+    if (isFull) {
+      setForm(member as unknown as Record<string, unknown>);
+      setPhoto((member as MemberRow).photo_url);
+    }
     setPhotoError("");
     setSaveError("");
     setEditing(false);
@@ -196,7 +229,6 @@ function Profile() {
       <div className="mx-auto max-w-4xl px-5">
         {/* Identity card — overlaps the cover */}
         <div className="relative -mt-16 animate-fade-up rounded-3xl border border-gold/40 bg-card px-6 pb-6 pt-20 shadow-[0_30px_60px_-35px_oklch(0.34_0.12_18/0.5)] sm:pt-6">
-          {/* Avatar, overlapping cover + card */}
           <div className="absolute -top-14 left-1/2 -translate-x-1/2 sm:left-6 sm:translate-x-0">
             <div className="relative">
               <div
@@ -252,23 +284,44 @@ function Profile() {
                     <Cake size={12} /> {MONTH_NAMES[member.birth_month]} {member.birth_day}
                   </span>
                 )}
-                {member.address && (
+                {isFull && (member as MemberRow).address && (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                    <MapPin size={12} /> {member.address}
+                    <MapPin size={12} /> {(member as MemberRow).address}
                   </span>
                 )}
               </div>
             </div>
 
-            {canEdit && !editing && (
-              <button
-                onClick={() => setEditing(true)}
-                className="flex shrink-0 items-center gap-2 rounded-full bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-md"
-              >
-                <Pencil size={14} /> Edit profile
-              </button>
-            )}
+            <div className="flex shrink-0 flex-col items-stretch gap-2">
+              {canEdit && !editing && (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="flex items-center justify-center gap-2 rounded-full bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground shadow-sm transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-md"
+                >
+                  <Pencil size={14} /> Edit profile
+                </button>
+              )}
+              {!isFull && isUnclaimed && (
+                <button
+                  onClick={() => claimMember.mutate(memberId)}
+                  disabled={claimMember.isPending}
+                  className="flex items-center justify-center gap-2 rounded-full bg-maroon px-4 py-2 text-sm font-semibold text-maroon-foreground shadow-sm transition hover:bg-maroon/90 disabled:opacity-60"
+                >
+                  {claimMember.isPending ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                  This is me — claim profile
+                </button>
+              )}
+            </div>
           </div>
+          {claimMember.error && (
+            <p className="mt-3 text-center text-sm text-destructive sm:text-left">
+              {(claimMember.error as Error).message}
+            </p>
+          )}
         </div>
 
         {/* Facts */}
@@ -276,49 +329,59 @@ function Profile() {
           <section className="mt-6 animate-fade-up [animation-delay:80ms]">
             <div className="mb-3 flex items-center gap-2 px-1">
               <div className="gold-rule h-px flex-1" />
-              <h2 className="text-[0.68rem] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+              <h2 className="text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-gold">
                 Profile
               </h2>
               <div className="gold-rule h-px flex-1" />
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {FACTS.map(({ key, label, icon: Icon }) => {
-                const value = member[key];
-                const filled = value !== null && value !== undefined && value !== "";
-                return (
-                  <div
-                    key={key}
-                    className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 transition duration-300 hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
-                  >
-                    <span
-                      className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
-                      style={{ background: c.soft, color: c.solid }}
+            {!isFull && (
+              <div className="mb-4 flex items-center gap-3 rounded-2xl border border-gold/50 bg-gold/10 px-4 py-3 text-sm text-maroon">
+                <Lock size={16} className="shrink-0" />
+                Personal details of this batchmate are private — only they (or an admin) can
+                see and edit them.
+              </div>
+            )}
+
+            {isFull && (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {FACTS.map(({ key, label, icon: Icon }) => {
+                  const value = (member as MemberRow)[key];
+                  const filled = value !== null && value !== undefined && value !== "";
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-start gap-3 rounded-2xl border border-border bg-card px-4 py-3.5 transition duration-300 hover:-translate-y-0.5 hover:border-gold/60 hover:shadow-md"
                     >
-                      <Icon size={16} />
-                    </span>
-                    <div className="min-w-0">
-                      <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
-                        {label}
-                      </dt>
-                      <dd
-                        className={
-                          filled
-                            ? "mt-0.5 break-words text-sm font-medium text-foreground"
-                            : "mt-0.5 text-sm italic text-muted-foreground/70"
-                        }
+                      <span
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-full"
+                        style={{ background: c.soft, color: c.solid }}
                       >
-                        {filled ? String(value) : "Not shared yet"}
-                      </dd>
+                        <Icon size={16} />
+                      </span>
+                      <div className="min-w-0">
+                        <dt className="text-[0.65rem] uppercase tracking-[0.18em] text-muted-foreground">
+                          {label}
+                        </dt>
+                        <dd
+                          className={
+                            filled
+                              ? "mt-0.5 break-words text-sm font-medium text-foreground"
+                              : "mt-0.5 text-sm italic text-muted-foreground/70"
+                          }
+                        >
+                          {filled ? String(value) : "Not shared yet"}
+                        </dd>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
             {saved && (
               <p className="mt-5 text-center text-sm font-medium text-maroon">
-                ✓ Saved to this device.
+                ✓ Saved to the cloud.
               </p>
             )}
           </section>
@@ -382,9 +445,15 @@ function Profile() {
             <div className="mt-6 flex gap-2">
               <button
                 onClick={handleSave}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg"
+                disabled={updateMember.isPending}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-maroon py-3 font-semibold text-maroon-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-maroon/90 hover:shadow-lg disabled:opacity-60"
               >
-                <Save size={16} /> Save profile
+                {updateMember.isPending ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Save size={16} />
+                )}
+                Save profile
               </button>
               <button
                 onClick={cancelEdit}
