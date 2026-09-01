@@ -35,25 +35,40 @@ export const Route = createFileRoute("/")({
 const SPECTRUM = Array.from({ length: 24 }, (_, i) => (i * 137.508) % 360);
 
 function LoginPage() {
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [busy, setBusy] = useState(false);
   const navigate = useNavigate();
+  const { session, loading } = useSupabaseAuth();
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    if (session) navigate({ to: "/directory" });
+  }, [session, navigate]);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setNotice("");
+    setBusy(true);
     try {
-      const role = login(password);
-      if (!role) {
-        setError("That password doesn't match our records.");
-        return;
+      if (mode === "signin") {
+        await signInWithEmail(email.trim(), password);
+        navigate({ to: "/directory" });
+      } else {
+        const { needsConfirmation } = await signUpWithEmail(email.trim(), password);
+        if (needsConfirmation) {
+          setNotice("Check your inbox to confirm your email, then sign in.");
+        } else {
+          navigate({ to: "/directory" });
+        }
       }
-      navigate({ to: role === "admin" ? "/admin" : "/directory" });
     } catch (err) {
-      setError(
-        err instanceof StorageUnavailableError
-          ? err.message
-          : "Something went wrong. Please try again.",
-      );
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
     }
   }
 
