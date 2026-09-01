@@ -1,7 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Lock, Sparkles, Users, Cake, Award } from "lucide-react";
-import { login, StorageUnavailableError } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { Lock, Sparkles, Users, Cake, Award, Loader2 } from "lucide-react";
+import {
+  signInWithEmail,
+  signUpWithEmail,
+  useSupabaseAuth,
+} from "@/lib/store.supabase";
 import { EcgLine } from "@/components/EcgLine";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GradientBar } from "@/components/GradientBar";
