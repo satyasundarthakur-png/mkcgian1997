@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DirectoryRouteImport } from './routes/directory'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ProfileIdRouteImport } from './routes/profile.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const DirectoryRoute = DirectoryRouteImport.update({
   path: '/directory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileIdRoute = ProfileIdRouteImport.update({
   id: '/profile/$id',
   path: '/profile/$id',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/directory': typeof DirectoryRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/profile/$id': typeof ProfileIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/directory': typeof DirectoryRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/profile/$id': typeof ProfileIdRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,23 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/directory': typeof DirectoryRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/profile/$id': typeof ProfileIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/directory' | '/profile/$id'
+  fullPaths: '/' | '/admin' | '/directory' | '/sitemap.xml' | '/profile/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/directory' | '/profile/$id'
-  id: '__root__' | '/' | '/admin' | '/directory' | '/profile/$id'
+  to: '/' | '/admin' | '/directory' | '/sitemap.xml' | '/profile/$id'
+  id:
+    '__root__' | '/' | '/admin' | '/directory' | '/sitemap.xml' | '/profile/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   DirectoryRoute: typeof DirectoryRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProfileIdRoute: typeof ProfileIdRoute
 }
 
@@ -92,6 +103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile/$id': {
       id: '/profile/$id'
       path: '/profile/$id'
@@ -106,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   DirectoryRoute: DirectoryRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProfileIdRoute: ProfileIdRoute,
 }
 export const routeTree = rootRouteImport
