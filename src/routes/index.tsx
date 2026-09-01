@@ -13,22 +13,25 @@ import { GradientBar } from "@/components/GradientBar";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "MKCGIAN 1997 — MBBS Batch Reunion Directory" },
+      { title: "MKCGIAN 1997 Reunion Archive — Sign In" },
       {
         name: "description",
         content:
-          "Private reunion directory for the MKCG Medical College MBBS batch of 1997. Sign in with the batch password to browse batchmate profiles, photographs and achievements.",
+          "Entry point to the MKCG Medical College MBBS 1997 reunion archive. Sign in or create your batchmate account to browse portraits, postings and certificates.",
       },
-      { property: "og:title", content: "MKCGIAN 1997 — MBBS Batch Reunion Directory" },
+      { property: "og:title", content: "MKCGIAN 1997 Reunion Archive — Sign In" },
       {
         property: "og:description",
         content:
-          "A memorabilia archive of the MKCG Medical College MBBS batch of 1997 — portraits, milestones and certificates of all doctors.",
+          "Sign in to the private memorabilia archive of the MKCG Medical College MBBS batch of 1997.",
       },
+      { property: "og:url", content: "https://mkcgians1997.lovable.app/" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://mkcgians1997.lovable.app/" }],
   }),
+
   component: LoginPage,
 });
 

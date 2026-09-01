@@ -141,7 +141,12 @@ function Directory() {
         )}
 
         {!isLoading && !error && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <>
+            <h2 className="mb-3 font-display text-xl text-foreground">
+              Batchmates <span className="text-sm text-muted-foreground">({filtered.length})</span>
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
             {filtered.map((m, i) => {
               const c = memberSpectrum(m.id);
               return (
@@ -201,8 +206,10 @@ function Directory() {
                 </div>
               );
             })}
-          </div>
+            </div>
+          </>
         )}
+
 
         {!isLoading && !error && filtered.length === 0 && (
           <p className="py-16 text-center text-sm text-muted-foreground">

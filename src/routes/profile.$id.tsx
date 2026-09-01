@@ -31,23 +31,22 @@ import {
 } from "@/lib/store.supabase";
 
 export const Route = createFileRoute("/profile/$id")({
-  head: () => ({
-    meta: [
-      { title: "Batchmate Profile | MKCGIAN 1997" },
-      {
-        name: "description",
-        content:
-          "A memorabilia profile — portrait, birthday, city, speciality and family of an MKCGIAN 1997 batchmate.",
-      },
-      { property: "og:title", content: "Batchmate Profile | MKCGIAN 1997" },
-      {
-        property: "og:description",
-        content: "Portrait and milestones of an MKCGIAN 1997 batchmate.",
-      },
-      { property: "og:type", content: "profile" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
+  head: ({ params }) => {
+    const title = `Batchmate #${params.id} — MKCGIAN 1997 Memorabilia Profile`;
+    const description = `Private memorabilia profile of MKCGIAN 1997 batchmate #${params.id} — portrait, birthday, city, speciality, family and certificates.`;
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { name: "robots", content: "noindex, nofollow" },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "profile" },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+    };
+  },
+
   component: Profile,
 });
 
